@@ -20,5 +20,10 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    
+    #Rota raiz e vitórias ficam no Core
+    path('', include('core.urls')),
+
+    path('sala/hardware/', include('hardware.urls')),
+    path('sala/word/', include('world.urls')),
+    path('sala/excel/', include('excel.urls')),
 ]
