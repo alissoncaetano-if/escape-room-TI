@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sala de Hardware{% endblock %}
+{% block status %}FALHA DE HARDWARE DETECTADA{% endblock %}
+
+{% block content %}
+    <h2>Módulo 1: O Cérebro da Máquina</h2>
+    <p>O sistema não liga. Falta o componente principal de processamento</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Insira o componente</label>
+        <input type="text" name="answer" autofocus>
+        <button type="submit">Conectar</button>
+    </form>
+    {% if error %}
+        <p class="error">> ERRO: {{ error}}</p>
+    {% endif %}
+{% endblock %}

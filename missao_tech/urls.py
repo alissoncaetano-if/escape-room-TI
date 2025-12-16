@@ -19,11 +19,13 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Rotas de login/logout nativas
+    path('accounts/', include('django.contrib.auth.urls')), 
 
     #Rota raiz e vitórias ficam no Core
-    path('', include('core.urls')),
+    path('', include('apps.core.urls')),
 
-    path('sala/hardware/', include('hardware.urls')),
-    path('sala/word/', include('world.urls')),
-    path('sala/excel/', include('excel.urls')),
+    path('sala/hardware/', include('apps.hardware.urls')),
+    path('sala/word/', include('apps.word.urls')),
+    path('sala/excel/', include('apps.excel.urls')),
 ]

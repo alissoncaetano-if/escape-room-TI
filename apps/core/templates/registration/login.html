@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login do Sistema{% endblock %}
+
+{% block content %}
+    <h2>>> AUTENTICAÇÃO DE AGENTE</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Renderização manual simples para manter o estilo -->
+         <label>Usuário:</label>
+         {{ form.username }}
+
+         <label>Senha:</label>
+         {{ form.password }}
+
+         <br>
+         <button type="submit">ENTRAR NO SISTEMA</button>
+         <input type="hidden" name="next" value="{{ next }}">
+    </form>
+
+    <p style="font-size: 0.8em; margin-top: 20px">
+        Novo recruta? <a href="{% url 'core:register' %}">Faça seu cadastro aqui.</a>
+    </p>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center;"> PROTOCOLO DE RECUPERAÇÃO INICIADO</h1>
+    <hr style="border-color: var(--dim-green);">
+    
+    <h3>// O PROBLEMA</h3>
+    <p>O sistema central do laboratório foi corrompido. Nossos bancos de dados de Hardware, Documentação e Planilhas estão inacessíveis.</p>
+    
+    <h3>// SUA MISSÃO</h3>
+    <p>Você deve navegar por 3 salas de segurança e resolver os enigmas para restaurar o sistema:</p>
+    <ul>
+        <li><strong>SALA 01 [HARDWARE]:</strong> Identifique e reinstale os componentes físicos.</li>
+        <li><strong>SALA 02 [WORD]:</strong> Corrija os arquivos de texto corrompidos.</li>
+        <li><strong>SALA 03 [EXCEL]:</strong> Recalcule as fórmulas financeiras perdidas.</li>
+    </ul>
+
+    <h3>// INSTRUÇÕES</h3>
+    <p>1. Crie uma conta de agente ou faça login.</p>
+    <p>2. Não recarregue a página durante um desafio.</p>
+    <p>3. Use seu conhecimento técnico. O Google é permitido, mas o tempo é curto.</p>
+
+    <div style="text-align: center; margin-top: 40px;">
+        {% if user.is_authenticated %}
+            <a href="{% url 'hardware:room' %}" class="btn">>> ACESSAR TERMINAL <<</a>
+        {% else %}
+            <p style="color: yellow;">ACESSO NEGADO: Identificação necessária.</p>
+            <a href="{% url 'login' %}" class="btn">LOGIN</a>
+            <a href="{% url 'core:register' %}" class="btn">CRIAR CONTA</a>
+        {% endif %}
+    </div>
+{% endblock %}
