@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index(request):
+    if request.user.is_authenticated:
+        return redirect('core:dashboard')
     return render(request, 'core/index.html')
 
 # def register_player(request):
@@ -15,19 +17,23 @@ def index(request):
 #         return redirect('hardware:room') # Redireciona para o app Hardware
 #     return redirect('core:index')
 
+@login_required
+def dashboard(request):
+    return render(request, 'core/dashboard.html')
+
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('index')
+            return redirect('core:dashboard')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
 
-@login_required
+
 def victory(request):
     # Só acessa se completou o estágio 3 (Excel)
     # if request.session.get('stage', 0) < 4:

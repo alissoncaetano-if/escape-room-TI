@@ -1,0 +1,86 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Painel de Missões{% endblock %}
+
+{% block extra_css %}
+    .dashboard-container {
+        padding: 50px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .grid-missions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+    .card {
+        border: 1px solid var(--dim-green);
+        background: rgba(0, 20, 0, 0.6);
+        padding: 30px;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .card:hover {
+        border-color: var(--terminal-green);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+        transform: translateY(-5px);
+    }
+    .card h2 { color: #fff; margin-bottom: 10px; border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;}
+    .card p { font-size: 0.9rem; color: #ccc; margin-bottom: 20px; flex-grow: 1; }
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #111;
+        border: 1px solid var(--terminal-green);
+        font-size: 0.7rem;
+        margin-bottom: 15px;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 style="text-align: center;">>> PAINEL DE CONTROLE DE MISSÕES</h1>
+    <p style="text-align: center; color: var(--dim-green);">Selecione um módulo para iniciar o reparo.</p>
+
+    {% if user.is_staff %}
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/admin/" class="btn" style="border-style: dashed;">[ÁREA DO PROFESSOR: CRIAR QUESTÕES]</a>
+    </div>
+    {% endif %}
+
+    <div class="grid-missions">
+        <!-- HARDWARE -->
+        <div class="card">
+            <div>
+                <span class="status-badge">STATUS: CRÍTICO</span>
+                <h2>[01] HARDWARE</h2>
+                <p>O servidor físico apresenta falhas. Identifique componentes e conecte os cabos virtuais para restaurar a energia.</p>
+            </div>
+            <a href="{% url 'hardware:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+        </div>
+
+        <!-- WORD -->
+        <div class="card">
+            <div>
+                <span class="status-badge">STATUS: CORROMPIDO</span>
+                <h2>[02] PROCESSAMENTO DE TEXTO</h2>
+                <p>Documentos confidenciais foram desformatados. Utilize comandos do Word para recuperar a legibilidade dos arquivos.</p>
+            </div>
+            <a href="{% url 'word:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+        </div>
+
+        <!-- EXCEL -->
+        <div class="card">
+            <div>
+                <span class="status-badge">STATUS: OFFLINE</span>
+                <h2>[03] PLANILHAS DE DADOS</h2>
+                <p>O banco de dados financeiro travou. Aplique fórmulas lógicas e matemáticas para validar as transações.</p>
+            </div>
+            <a href="{% url 'excel:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

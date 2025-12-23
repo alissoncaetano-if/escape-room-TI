@@ -1,34 +1,148 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Início{% endblock %}
+
+{% block title %}Acesso Restrito{% endblock %}
+
+{% block extra_css %}
+    .story-screen, .login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .story-container, .login-container {
+        max-width: 900px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Caixa de Diálogo Hacker */
+    .dialogue-box {
+        background: rgba(0, 20, 0, 0.9);
+        border: 2px solid var(--terminal-green);
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        position: relative;
+    }
+
+    .speaker-name {
+        color: var(--terminal-green);
+        font-weight: bold;
+        border-bottom: 1px dashed var(--dim-green);
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        display: inline-block;
+    }
+
+    .dialogue-text {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        min-height: 80px;
+    }
+
+    .character-placeholder {
+        text-align: center;
+        margin-bottom: 20px;
+        border: 1px solid var(--dim-green);
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        opacity: 0.7;
+    }
+    
+    /* Login Form */
+    .login-container { max-width: 450px; }
+    .login-title { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--terminal-green); padding-bottom: 10px; }
+{% endblock %}
 
 {% block content %}
-    <h1 style="text-align: center;"> PROTOCOLO DE RECUPERAÇÃO INICIADO</h1>
-    <hr style="border-color: var(--dim-green);">
-    
-    <h3>// O PROBLEMA</h3>
-    <p>O sistema central do laboratório foi corrompido. Nossos bancos de dados de Hardware, Documentação e Planilhas estão inacessíveis.</p>
-    
-    <h3>// SUA MISSÃO</h3>
-    <p>Você deve navegar por 3 salas de segurança e resolver os enigmas para restaurar o sistema:</p>
-    <ul>
-        <li><strong>SALA 01 [HARDWARE]:</strong> Identifique e reinstale os componentes físicos.</li>
-        <li><strong>SALA 02 [WORD]:</strong> Corrija os arquivos de texto corrompidos.</li>
-        <li><strong>SALA 03 [EXCEL]:</strong> Recalcule as fórmulas financeiras perdidas.</li>
-    </ul>
-
-    <h3>// INSTRUÇÕES</h3>
-    <p>1. Crie uma conta de agente ou faça login.</p>
-    <p>2. Não recarregue a página durante um desafio.</p>
-    <p>3. Use seu conhecimento técnico. O Google é permitido, mas o tempo é curto.</p>
-
-    <div style="text-align: center; margin-top: 40px;">
-        {% if user.is_authenticated %}
-            <a href="{% url 'hardware:room' %}" class="btn">>> ACESSAR TERMINAL <<</a>
-        {% else %}
-            <p style="color: yellow;">ACESSO NEGADO: Identificação necessária.</p>
-            <a href="{% url 'login' %}" class="btn">LOGIN</a>
-            <a href="{% url 'core:register' %}" class="btn">CRIAR CONTA</a>
-        {% endif %}
+    <!-- Tela 1: Story Telling -->
+    <div class="story-screen" id="storyScreen">
+        <div class="story-container">
+            <div class="character-container">
+                <div class="character-placeholder">
+                    <!-- Você pode colocar uma tag <img> aqui se tiver a imagem -->
+                    <!-- [IMAGEM CRIPTOGRAFADA DO AGENTE]
+                    <br>
+                    <small>ID: UNKNOWN</small> -->
+                    <img src="{% static 'img/agente1.png' %}" alt="Imagem do Agente">
+                </div>
+            </div>
+            <div class="dialogue-box">
+                <div class="speaker-name" id="speakerName">SISTEMA</div>
+                <div class="dialogue-text" id="dialogueText">Iniciando protocolo de segurança...</div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn" onclick="nextDialogue()">PRÓXIMO >></button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Tela 2: Login (Escondida inicialmente) -->
+    <div class="login-screen hidden" id="loginScreen">
+        <div class="login-container dialogue-box">
+            <h2 class="login-title">>> IDENTIFICAÇÃO NECESSÁRIA</h2>
+            
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                <label>NOME DE CÓDIGO (Usuário)</label>
+                <input type="text" name="username" autofocus required>
+                
+                <label>CHAVE DE ACESSO (Senha)</label>
+                <input type="password" name="password" required>
+                
+                <button type="submit" class="btn" style="width: 100%;">ACESSAR SISTEMA</button>
+            </form>
+            
+            <div style="margin-top: 20px; text-align: center; font-size: 0.8rem;">
+                <p>Novo recruta? <a href="{% url 'core:register' %}" style="color: var(--terminal-green);">Solicitar credenciais (Cadastrar)</a></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    let dialogueIndex = 0;
+    
+    const dialogues = [
+        {
+            speaker: "SISTEMA",
+            text: "Detectamos uma falha crítica no núcleo. Bem-vindo à <strong>Missão Tech</strong>."
+        },
+        {
+            speaker: "SISTEMA",
+            text: "Seu objetivo é restaurar os módulos de <strong>Hardware, Word e Excel</strong> antes que os dados sejam perdidos para sempre."
+        },
+        {
+            speaker: "SISTEMA",
+            text: "Cada sala contém um enigma que testará suas habilidades técnicas. Falhar não é uma opção."
+        },
+        {
+            speaker: "SISTEMA",
+            text: "Insira suas credenciais para acessar o terminal de controle."
+        }
+    ];
+
+    // Inicializa o texto
+    document.getElementById('dialogueText').innerHTML = dialogues[0].text;
+
+    function nextDialogue() {
+        dialogueIndex++;
+        if (dialogueIndex < dialogues.length) {
+            document.getElementById('speakerName').textContent = dialogues[dialogueIndex].speaker;
+            document.getElementById('dialogueText').innerHTML = dialogues[dialogueIndex].text;
+        } else {
+            // Esconde história, mostra login
+            document.getElementById('storyScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+    }
 {% endblock %}

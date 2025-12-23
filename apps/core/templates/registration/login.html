@@ -2,12 +2,37 @@
 
 {% block title %}Login do Sistema{% endblock %}
 
+{% block extra_css %}
+
+    .login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+/* Caixa de Diálogo Hacker */
+    .dialogue-box {
+        background: rgba(0, 20, 0, 0.9);
+        border: 2px solid var(--terminal-green);
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        position: relative;
+    }
+
+/* Login Form */
+    .login-container { max-width: 450px; }
+    .login-title { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--terminal-green); padding-bottom: 10px; }
+
+{% endblock %}
+
 {% block content %}
-    <h2>>> AUTENTICAÇÃO DE AGENTE</h2>
+    <!-- <h2>>> AUTENTICAÇÃO DE AGENTE</h2>
     <form method="post">
         {% csrf_token %}
 
-        <!-- Renderização manual simples para manter o estilo -->
+        
          <label>Usuário:</label>
          {{ form.username }}
 
@@ -21,5 +46,27 @@
 
     <p style="font-size: 0.8em; margin-top: 20px">
         Novo recruta? <a href="{% url 'core:register' %}">Faça seu cadastro aqui.</a>
-    </p>
+    </p> -->
+
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container dialogue-box">
+            <h2 class="login-title">>> IDENTIFICAÇÃO NECESSÁRIA</h2>
+            
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                
+                <label>NOME DE CÓDIGO (Usuário)</label>
+                <input type="text" name="username" autofocus required>
+                
+                <label>CHAVE DE ACESSO (Senha)</label>
+                <input type="password" name="password" required>
+                
+                <button type="submit" class="btn" style="width: 100%;">ACESSAR SISTEMA</button>
+            </form>
+            
+            <div style="margin-top: 20px; text-align: center; font-size: 0.8rem;">
+                <p>Novo recruta? <a href="{% url 'core:register' %}" style="color: var(--terminal-green);">Solicitar credenciais (Cadastrar)</a></p>
+            </div>
+        </div>
+    </div>
 {% endblock %}
