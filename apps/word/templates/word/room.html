@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sala Word{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 50px auto; border: 2px solid var(--terminal-green); padding: 20px; background: rgba(0,20,0,0.9);">
+    <h2 style="border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;">>> MÓDULO 2: DOCUMENTAÇÃO</h2>
+    
+    <p>O arquivo de texto perdeu a formatação. O sistema fornece uma definição técnica. Digite o <strong>NOME DA FERRAMENTA</strong> do Word correspondente.</p>
+
+    <div style="margin: 30px 0; padding: 20px; background: #000; border-left: 4px solid var(--terminal-green);">
+        <p style="color: var(--dim-green);">// DICA DE RECUPERAÇÃO:</p>
+        <h3 style="color: #fff; font-size: 1.5rem;">"{{ term.clue }}"</h3>
+        <small style="color: #666;">Categoria: {{ term.category }}</small>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>COMANDO / FERRAMENTA:</label>
+        <input type="text" name="answer" placeholder="Ex: Negrito" required autocomplete="off" autofocus>
+        
+        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">EXECUTAR COMANDO</button>
+    </form>
+
+    {% if error %}
+        <p style="color: var(--error-red); margin-top: 15px; text-align: center;">>> {{ error }}</p>
+    {% endif %}
+</div>
+{% endblock %}

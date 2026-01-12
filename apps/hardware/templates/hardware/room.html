@@ -1,19 +1,38 @@
 {% extends 'core/base.html' %}
 
 {% block title %}Sala de Hardware{% endblock %}
-{% block status %}FALHA DE HARDWARE DETECTADA{% endblock %}
 
 {% block content %}
-    <h2>Módulo 1: O Cérebro da Máquina</h2>
-    <p>O sistema não liga. Falta o componente principal de processamento</p>
+<div style="max-width: 800px; margin: 50px auto; border: 2px solid var(--terminal-green); padding: 20px; background: rgba(0,20,0,0.9);">
+    <h2 style="border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;">>> MÓDULO 1: HARDWARE</h2>
+    
+    <p>O sistema identificou um componente desconectado. Analise a imagem ou a descrição técnica abaixo e insira o <strong>NOME DO COMPONENTE</strong> para religá-lo.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        {% if component.image %}
+            <img src="{{ component.image.url }}" alt="Componente Misterioso" style="max-width: 100%; border: 1px solid var(--terminal-green); max-height: 300px;">
+        {% else %}
+            <div style="padding: 50px; border: 1px dashed var(--dim-green); color: var(--dim-green);">
+                [IMAGEM CORROMPIDA]
+            </div>
+        {% endif %}
+        
+        <p style="margin-top: 15px; color: #fff;">
+            <strong>>> LOG DO SISTEMA:</strong><br>
+            <span style="font-family: monospace; color: var(--terminal-green);">"{{ component.description }}"</span>
+        </p>
+    </div>
 
     <form method="post">
         {% csrf_token %}
-        <label>Insira o componente</label>
-        <input type="text" name="answer" autofocus>
-        <button type="submit">Conectar</button>
+        <label>DIGITE O NOME DA PEÇA:</label>
+        <input type="text" name="answer" placeholder="Ex: Mouse" required autocomplete="off" autofocus>
+        
+        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">CONECTAR COMPONENTE</button>
     </form>
+
     {% if error %}
-        <p class="error">> ERRO: {{ error}}</p>
+        <p style="color: var(--error-red); margin-top: 15px; text-align: center;">>> {{ error }}</p>
     {% endif %}
+</div>
 {% endblock %}
