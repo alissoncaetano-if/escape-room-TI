@@ -1,95 +1,144 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Painel de Missões{% endblock %}
+{% block title %}Painel de Controle{% endblock %}
 
 {% block extra_css %}
-
     body {
-        background-image: url("{% static 'img/background_img.png' %}");
+        /* Imagem de Fundo Fixa da Sala de Comando */
+        background: url("{% static 'img/command_center.png' %}") no-repeat center center fixed;
         background-size: cover;
-        backgroun-repeat: no-repeat;
-        background-position: center;
     }
-    .dashboard-container {
-        padding: 50px 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-        
+    
+    /* Camada escura sobre a imagem para o texto ficar legível */
+    .overlay {
+        background: rgba(0, 0, 0, 0.7); /* 70% de escuridão */
+        min-height: calc(100vh - 70px); /* Altura total menos navbar */
+        padding: 40px 20px;
     }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 0 10px var(--text-highlight);
+    }
+
     .grid-missions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 30px;
-        margin-top: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
-    .card {
-        border: 1px solid var(--dim-green);
-        background: rgba(0, 20, 0, 0.97);
+
+    /* Cards Estilizados (Glassmorphism) */
+    .mission-card {
+        background: rgba(22, 27, 34, 0.85); /* Fundo semi-transparente */
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
         padding: 30px;
-        transition: 0.3s;
+        transition: transform 0.3s ease, border-color 0.3s ease;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }
-    .card:hover {
-        border-color: var(--terminal-green);
-        box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+
+    .mission-card:hover {
         transform: translateY(-5px);
+        border-color: var(--text-highlight);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
-    .card h2 { color: #fff; margin-bottom: 10px; border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;}
-    .card p { font-size: 0.9rem; color: #ccc; margin-bottom: 20px; flex-grow: 1; }
+
+    .mission-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: var(--text-highlight);
+    }
+
+    .mission-title {
+        color: #fff;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .mission-desc {
+        color: #b0b0b0;
+        font-size: 0.95rem;
+        margin-bottom: 25px;
+        flex-grow: 1; /* Empurra o botão para baixo */
+    }
+
     .status-badge {
         display: inline-block;
-        padding: 5px 10px;
-        background: #111;
-        border: 1px solid var(--terminal-green);
-        font-size: 0.7rem;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 4px;
         margin-bottom: 15px;
+        font-weight: bold;
+        letter-spacing: 1px;
     }
+    
+    .status-locked { background: #333; color: #777; border: 1px solid #555; }
+    .status-active { background: rgba(0, 255, 65, 0.1); color: var(--text-highlight); border: 1px solid var(--text-highlight); }
+    .status-done { background: rgba(35, 134, 54, 0.2); color: #4ade80; border: 1px solid #238636; }
+
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <h1 style="text-align: center;">>> PAINEL DE CONTROLE DE MISSÕES</h1>
-    <p style="text-align: center; color: var(--dim-green);">Selecione um módulo para iniciar o reparo.</p>
-
-    {% if user.is_staff %}
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="/admin/" class="btn" style="border-style: dashed;">[ÁREA DO PROFESSOR: CRIAR QUESTÕES]</a>
+<div class="overlay">
+    <div class="dashboard-header">
+        <h1>PAINEL DE MISSÕES</h1>
+        <p style="color: #ccc; font-size: 1.1rem;">Agente <strong>{{ user.username }}</strong>, selecione um protocolo para iniciar.</p>
     </div>
-    {% endif %}
 
     <div class="grid-missions">
+        
         <!-- HARDWARE -->
-        <div class="card">
+        <div class="mission-card">
             <div>
-                <span class="status-badge">STATUS: CRÍTICO</span>
-                <h2>[01] HARDWARE</h2>
-                <p>O servidor físico apresenta falhas. Identifique componentes e conecte os cabos virtuais para restaurar a energia.</p>
+                <span class="status-badge status-active">STATUS: CRÍTICO</span>
+                <div class="mission-icon">🖥️</div>
+                <h3 class="mission-title">Hardware</h3>
+                <p class="mission-desc">
+                    O servidor físico sofreu danos. Identifique os componentes internos para remontar a máquina principal.
+                </p>
             </div>
-            <a href="{% url 'hardware:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+            <a href="{% url 'hardware:room' %}" class="btn">INICIAR REPARO</a>
         </div>
 
         <!-- WORD -->
-        <div class="card">
+        <div class="mission-card">
             <div>
-                <span class="status-badge">STATUS: CORROMPIDO</span>
-                <h2>[02] PROCESSAMENTO DE TEXTO</h2>
-                <p>Documentos confidenciais foram desformatados. Utilize comandos do Word para recuperar a legibilidade dos arquivos.</p>
+                <span class="status-badge status-locked">STATUS: AGUARDANDO</span>
+                <div class="mission-icon">📄</div>
+                <h3 class="mission-title">Processamento de Texto</h3>
+                <p class="mission-desc">
+                    Arquivos vitais foram corrompidos. Use comandos de formatação para recuperar a inteligibilidade dos dados.
+                </p>
             </div>
-            <a href="{% url 'word:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+            <!-- Só libera se passar do Hardware (Lógica visual apenas, a proteção real tá na View) -->
+            <a href="{% url 'word:room' %}" class="btn" style="opacity: 0.7;">ACESSAR</a>
         </div>
 
         <!-- EXCEL -->
-        <div class="card">
+        <div class="mission-card">
             <div>
-                <span class="status-badge">STATUS: OFFLINE</span>
-                <h2>[03] PLANILHAS DE DADOS</h2>
-                <p>O banco de dados financeiro travou. Aplique fórmulas lógicas e matemáticas para validar as transações.</p>
+                <span class="status-badge status-locked">STATUS: BLOQUEADO</span>
+                <div class="mission-icon">📊</div>
+                <h3 class="mission-title">Planilhas</h3>
+                <p class="mission-desc">
+                    O sistema financeiro travou. Aplique fórmulas lógicas e matemáticas para validar as transações pendentes.
+                </p>
             </div>
-            <a href="{% url 'excel:room' %}" class="btn" style="text-align: center;">INICIAR REPARO</a>
+            <a href="{% url 'excel:room' %}" class="btn" style="opacity: 0.7;">ACESSAR</a>
         </div>
+
     </div>
 </div>
 {% endblock %}

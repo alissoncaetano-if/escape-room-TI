@@ -4,120 +4,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missão Tech | {% block title %}Sistema{% endblock %}</title>
+    <title>Missão Tech | {% block title %}Acesso{% endblock %}</title>
     <style>
         :root {
-            --bg-color: #050505;
-            --terminal-green: #00ff41;
-            --dim-green: #008F11;
-            --dark-gray: #1a1a1a;
-            --error-red: #ff3333;
-            --font-stack: 'Courier New', Courier, monospace;
+            /* Paleta Melhorada para Leitura */
+            --bg-body: #0a0a0a;           /* Preto suave */
+            --bg-card: #161b22;           /* Cinza azulado escuro (estilo GitHub Dark) */
+            --bg-input: #0d1117;
+            --text-main: #c9d1d9;         /* Branco gelo para texto longo */
+            --text-highlight: #00ff41;    /* Verde Matrix para títulos */
+            --border-color: #30363d;      /* Cinza borda */
+            --accent-color: #238636;      /* Verde botão (mais sóbrio) */
+            --error-red: #da3633;
+            
+            /* Fontes: Sans-serif para leitura, Monospace para código */
+            --font-main: 'Segoe UI', system-ui, sans-serif;
+            --font-code: 'Courier New', Courier, monospace;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--terminal-green);
-            font-family: var(--font-stack);
-            overflow-x: hidden;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Efeito de scanline (Monitor antigo) */
-        body::after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px;
-            z-index: 1000;
-            pointer-events: none;
-        }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
 
-        /* Navbar estilo Terminal */
+        /* Navbar Fixa e Organizada */
         .navbar {
-            background: #000;
-            border-bottom: 2px solid var(--terminal-green);
-            padding: 15px 40px;
+            background: rgba(22, 27, 34, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 900;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .navbar-brand { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+        .navbar-brand {
+            font-family: var(--font-code);
+            color: var(--text-highlight);
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+
+        .nav-item {
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        .nav-item:hover { background: var(--border-color); color: #fff; }
         
-        .nav-link, .logout-btn {
-            color: var(--terminal-green);
-            text-decoration: none;
-            margin-left: 20px;
-            border: 1px solid transparent;
-            padding: 5px 10px;
-            background: none;
+        .logout-btn {
+            background: #b91c1c;
+            border: none;
+            padding: 8px 16px;
+            color: white;
+            border-radius: 4px;
             cursor: pointer;
-            font-family: var(--font-stack);
-            font-size: 1rem;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
+        .logout-btn:hover { background: #991b1b; }
 
-        .nav-link:hover, .logout-btn:hover {
-            border-color: var(--terminal-green);
-            background: rgba(0, 255, 65, 0.1);
-        }
-
-        /* Utilitários */
-        .hidden { display: none !important; }
+        /* Botões Globais */
         .btn {
-            background: transparent;
-            border: 2px solid var(--terminal-green);
-            color: var(--terminal-green);
-            padding: 10px 20px;
-            font-family: var(--font-stack);
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--text-highlight);
+            color: var(--text-highlight);
+            padding: 12px 24px;
+            font-family: var(--font-code);
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            transition: 0.2s;
+            transition: all 0.3s ease;
+            text-align: center;
+            border-radius: 4px;
         }
         .btn:hover {
-            background: var(--terminal-green);
+            background: var(--text-highlight);
             color: #000;
-            box-shadow: 0 0 15px var(--terminal-green);
+            box-shadow: 0 0 15px var(--text-highlight);
         }
 
-        input {
-            background: #000;
-            border: 1px solid var(--dim-green);
-            color: var(--terminal-green);
-            padding: 12px;
+        /* Inputs mais legíveis */
+        input[type="text"], input[type="password"], input[type="email"] {
             width: 100%;
-            font-family: var(--font-stack);
+            padding: 12px;
             margin-bottom: 15px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 6px;
+            font-size: 1rem;
         }
-        input:focus { outline: none; border-color: var(--terminal-green); box-shadow: 0 0 5px var(--dim-green); }
+        input:focus {
+            outline: none;
+            border-color: var(--text-highlight);
+            box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.1);
+        }
 
-        /* Estilos específicos das telas herdadas */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-highlight);
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+        }
+
+        /* Container Padrão */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .error { color: var(--error-red); font-weight: bold; margin-top: 10px; }
+
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
-    {% if user.is_authenticated %}
+    <!-- Navbar só aparece se logado OU na tela inicial (com opções limitadas) -->
     <nav class="navbar">
-        <div class="navbar-brand">>> MISSÃO_TECH_</div>
-        <div class="navbar-menu">
-            <span style="font-size: 0.8em; margin-right: 20px;">AGENTE: {{ user.username|upper }}</span>
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="logout-btn">[DESCONECTAR]</button>
-            </form>
+        <div class="navbar-brand">
+            <a href="/">>> MISSÃO_TECH_</a>
+        </div>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                <a href="{% url 'core:dashboard' %}" class="nav-item">MISSÕES</a>
+                {% if user.is_staff %}
+                    <a href="/admin/" class="nav-item" style="color: yellow;">ÁREA PROFESSOR</a>
+                {% endif %}
+                <div style="width: 1px; height: 20px; background: var(--border-color);"></div>
+                <span style="font-size: 0.9rem; color: #888;">{{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">SAIR</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-item">LOGIN</a>
+                <a href="{% url 'core:register' %}" class="btn" style="padding: 6px 12px; font-size: 0.8rem;">CADASTRAR</a>
+            {% endif %}
         </div>
     </nav>
-    {% endif %}
 
-    {% block content %}{% endblock %}
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
 
     <script>
         {% block extra_js %}{% endblock %}

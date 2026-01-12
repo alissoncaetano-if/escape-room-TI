@@ -1,57 +1,54 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Novo Cadastro{% endblock %}
+{% block title %}Cadastro{% endblock %}
 
 {% block extra_css %}
-
-    .register-screen {
-        min-height: 100vh;
+    .auth-container {
+        min-height: 80vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
     }
 
-/* Caixa de Diálogo Hacker */
-    .dialogue-box {
-        background: rgba(0, 20, 0, 0.9);
-        border: 2px solid var(--terminal-green);
-        padding: 30px;
-        box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-        position: relative;
+    .auth-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 40px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
-
-/* Login Form */
-    .register-container { max-width: 450px; }
-    .register-title { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--terminal-green); padding-bottom: 10px; }
-
 {% endblock %}
 
 {% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 style="text-align: center; color: #fff; margin-bottom: 20px;">NOVO RECRUTA</h2>
+        <p style="text-align: center; color: #888; margin-bottom: 30px;">Preencha os dados para gerar sua credencial.</p>
 
-    <div class="register-screen" id="loginScreen">
-            <div class="register-container dialogue-box">
-                <h2>>> REGISTRO DE NOVO AGENTE</h2>
-                <form method="post">
-                    {% csrf_token %}
+        <form method="post">
+            {% csrf_token %}
 
-                    {% for field in form %}
-                        <div style="margin-bottom: 15px;">
-                            <label>{{ field.label }}</label>
-                            <!-- Hackizinho para aplicar clase ou estilo aos campos do form padrão -->
-                            <br>
-                            {{field}}
-                            {% if field.help_text %}
-                                <small style="color: #666; display: block;">{{ field.help.text }}</small>
-                            {% endif %}
-                            {% for error in fields.errors %}
-                                <div style="color: var(--error-red);">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                        {% endfor %}
+            {% for field in form %}
+                <div style="margin-bottom: 15px;">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small style="color: #666; display: block; margin-top: -10px; margin-bottom: 10px; font-size: 0.8rem;">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div style="color: var(--error-red); font-size: 0.85rem;">⚠ {{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
 
-                        <button type="submit" class="btn" style="width: 100%;">REGISTRAR E INICIAR</button>
-                </form>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">REGISTRAR E INICIAR</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 20px; color: #888;">
+            Já tem conta? <a href="{% url 'login' %}" style="color: var(--text-highlight);">Fazer Login</a>
+        </p>
     </div>
-        </div>
+</div>
 {% endblock %}
