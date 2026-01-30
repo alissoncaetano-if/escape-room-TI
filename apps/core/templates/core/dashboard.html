@@ -4,432 +4,143 @@
 {% block title %}Central de Missões{% endblock %}
 
 {% block extra_css %}
+<!-- (Mantenha o CSS anterior, só estou atualizando o bloco content para economizar espaço na resposta, mas copie o CSS do dashboard anterior se necessário) -->
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background: #0a0a0a;
-    }
+    /* ... Todo o CSS anterior do Dashboard ... */
+    /* Apenas certifique-se que o grid está OK */
+    body { margin: 0; padding: 0; overflow: hidden; background: #0a0a0a; }
+    .missions-hub { position: relative; width: 100vw; height: calc(100vh - 70px); background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 100%); display: flex; align-items: center; justify-content: center; }
+    .rooms-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 30px; max-width: 1400px; width: 100%; max-height: 800px; position: relative; z-index: 10; }
+    .room-card { position: relative; border-radius: 15px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: block; }
+    .room-card img { width: 100%; height: 100%; object-fit: cover; }
+    .room-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent); padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+    .room-card:hover .room-overlay { transform: translateY(0); }
+    .status-badge { position: absolute; top: 15px; right: 15px; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-family: monospace; z-index: 10; backdrop-filter: blur(5px); }
+    
+    .active-card { border-color: #00ff41; box-shadow: 0 0 20px rgba(0, 255, 65, 0.3); animation: glow 3s infinite alternate; }
+    .active-card .status-badge { background: rgba(0, 255, 65, 0.2); color: #fff; border: 1px solid #00ff41; }
+    .locked-card { cursor: not-allowed; filter: grayscale(0.9); opacity: 0.6; }
+    .locked-card .status-badge { background: #333; color: #777; border: 1px solid #555; }
+    .done-card { border-color: #238636; opacity: 0.8; }
+    .done-card .status-badge { background: rgba(35, 134, 54, 0.8); color: #fff; }
 
-    /* Container principal */
-    .missions-hub {
-        position: relative;
-        width: 100vw;
-        height: calc(100vh - 70px);
-        background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0a 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        overflow: hidden;
-    }
+    @keyframes glow { from { box-shadow: 0 0 10px rgba(0, 255, 65, 0.2); } to { box-shadow: 0 0 30px rgba(0, 255, 65, 0.5); } }
 
-    /* Grid de salas */
-    .rooms-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-        gap: 30px;
-        max-width: 1400px;
-        width: 100%;
-        height: 100%;
-        max-height: 800px;
-        position: relative;
-        z-index: 10;
-    }
-
-    /* Card de cada sala */
-    .room-card {
-        position: relative;
-        border-radius: 15px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 3px solid transparent;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .room-card:hover {
-        transform: translateY(-10px) scale(1.05);
-        border-color: var(--text-highlight);
-        box-shadow: 0 20px 50px rgba(0, 255, 65, 0.4);
-        z-index: 100;
-    }
-
-    /* Imagem da sala */
-    .room-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: all 0.3s ease;
-    }
-
-    .room-card:hover img {
-        filter: brightness(1.2);
-    }
-
-    /* Overlay com informações */
-    .room-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
-        padding: 20px;
-        transform: translateY(100%);
-        transition: transform 0.3s ease;
-    }
-
-    .room-card:hover .room-overlay {
-        transform: translateY(0);
-    }
-
-    .room-title {
-        color: var(--text-highlight);
-        font-family: var(--font-code);
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-        text-shadow: 0 0 10px var(--text-highlight);
-    }
-
-    .room-description {
-        color: #ccc;
-        font-size: 0.85rem;
-        line-height: 1.4;
-    }
-
-    /* Badge de status */
-    .status-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-family: var(--font-code);
-        font-size: 0.7rem;
-        font-weight: bold;
-        letter-spacing: 1.5px;
-        text-shadow: 0 0 5px currentColor;
-        z-index: 10;
-        backdrop-filter: blur(5px);
-    }
-
-    .status-active {
-        background: rgba(0, 255, 65, 0.3);
-        color: var(--text-highlight);
-        border: 2px solid var(--text-highlight);
-        animation: pulse 2s infinite;
-    }
-
-    .status-locked {
-        background: rgba(20, 20, 20, 0.9);
-        color: #888;
-        border: 2px solid #555;
-    }
-
-    .status-soon {
-        background: rgba(255, 165, 0, 0.3);
-        color: #ffa500;
-        border: 2px solid #ff8c00;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; box-shadow: 0 0 15px var(--text-highlight); }
-        50% { opacity: 0.7; box-shadow: 0 0 25px var(--text-highlight); }
-    }
-
-    /* Ícone de cadeado */
-    .lock-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 4rem;
-        color: rgba(255, 255, 255, 0.3);
-        z-index: 5;
-        text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-        pointer-events: none;
-    }
-
-    /* Overlay escuro para salas bloqueadas */
-    .room-locked {
-        cursor: not-allowed;
-    }
-
-    .room-locked::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
-        z-index: 2;
-    }
-
-    .room-locked:hover {
-        transform: scale(1.02);
-        border-color: #555;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    /* Posicionamento específico no grid */
-    #hardware-lab {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    #control-room {
-        grid-column: 2;
-        grid-row: 1 / 3; /* Ocupa 2 linhas */
-    }
-
-    #word-room {
-        grid-column: 3;
-        grid-row: 1;
-    }
-
-    #tech-store {
-        grid-column: 1;
-        grid-row: 2;
-    }
-
-    #excel-room {
-        grid-column: 3;
-        grid-row: 2;
-    }
-
-    /* Header informativo */
-    .dashboard-header {
-        position: absolute;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-        z-index: 1000;
-        background: rgba(10, 10, 10, 0.9);
-        padding: 12px 30px;
-        border-radius: 8px;
-        border: 1px solid rgba(0, 255, 65, 0.3);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
-    }
-
-    .dashboard-header h1 {
-        color: var(--text-highlight);
-        font-size: 1.3rem;
-        margin: 0;
-        font-family: var(--font-code);
-        text-shadow: 0 0 10px var(--text-highlight);
-        letter-spacing: 3px;
-    }
-
-    .dashboard-header p {
-        color: #bbb;
-        margin: 5px 0 0 0;
-        font-size: 0.8rem;
-    }
-
-    /* Efeito de brilho na sala ativa */
-    .room-active {
-        animation: glow-border 3s infinite;
-    }
-
-    @keyframes glow-border {
-        0%, 100% { 
-            border-color: var(--text-highlight);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
-        }
-        50% { 
-            border-color: rgba(0, 255, 65, 0.5);
-            box-shadow: 0 0 40px rgba(0, 255, 65, 0.7);
-        }
-    }
-
-    /* Responsividade */
-    @media (max-width: 1200px) {
-        .rooms-grid {
-            gap: 20px;
-            padding: 10px;
-        }
-        
-        .dashboard-header h1 {
-            font-size: 1.1rem;
-        }
-        
-        .room-title {
-            font-size: 1rem;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .missions-hub {
-            height: auto;
-            min-height: calc(100vh - 60px);
-        }
-        
-        .rooms-grid {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto;
-            gap: 20px;
-            max-height: none;
-        }
-        
-        #hardware-lab,
-        #control-room,
-        #word-room,
-        #tech-store,
-        #excel-room {
-            grid-column: 1;
-            grid-row: auto;
-        }
-        
-        #control-room {
-            grid-row: 3; /* Sala de controle no meio */
-        }
-        
-        .room-card {
-            height: 200px;
-        }
-        
-        .dashboard-header {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        
-        .lock-icon {
-            font-size: 3rem;
-        }
-    }
+    #hardware-lab { grid-column: 1; grid-row: 1; }
+    #control-room { grid-column: 2; grid-row: 1 / 3; }
+    #word-room { grid-column: 3; grid-row: 1; }
+    #tech-store { grid-column: 1; grid-row: 2; }
+    #excel-room { grid-column: 3; grid-row: 2; }
+    
+    .dashboard-header { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(10, 10, 10, 0.9); padding: 10px 30px; border: 1px solid #333; border-radius: 8px; z-index: 100; text-align: center; }
 </style>
 {% endblock %}
 
 {% block content %}
-
 <div class="missions-hub">
-    <!-- Header -->
     <div class="dashboard-header">
-        <h1>» CENTRAL DE MISSÕES_</h1>
-        <p>Agente <strong style="color: var(--text-highlight);">{{ user.username }}</strong> | Selecione sua missão</p>
+        <h1 style="color: #00ff41; font-size: 1.2rem; margin: 0; font-family: monospace;">» MAPA TÁTICO DA BASE</h1>
+        <p style="margin: 0; font-size: 0.8rem; color: #888;">STATUS DA MISSÃO: FASE {{ stage }}/5</p>
     </div>
 
-    <!-- Grid de Salas -->
     <div class="rooms-grid">
         
-        <!-- HARDWARE LAB - Superior Esquerdo (ATIVO) -->
-        <a href="{% url 'hardware:room' %}" class="room-card room-active" id="hardware-lab">
-            <span class="status-badge status-active">● ATIVO</span>
-            <img src="{% static 'img/Hardwarelab.png' %}" alt="Hardware Lab">
-            <div class="room-overlay">
-                <div class="room-title">🖥️ HARDWARE LAB</div>
-                <div class="room-description">
-                    O servidor físico sofreu danos críticos. Identifique os componentes e restaure o sistema.
-                </div>
-            </div>
-        </a>
-
-        <!-- SALA DE CONTROLE - Centro (Informativo) -->
-        <div class="room-card" id="control-room" style="cursor: default; border-color: rgba(0, 255, 65, 0.2);">
+        <!-- 1. SALA DE CONTROLE (O Início) -->
+        <a href="{% if stage == 1 %}{% url 'core:control_room' %}{% else %}#{% endif %}" 
+           class="room-card {% if stage == 1 %}active-card{% else %}done-card{% endif %}" id="control-room">
+            <span class="status-badge">{% if stage == 1 %}ALERTA DE ERRO{% else %}ONLINE{% endif %}</span>
             <img src="{% static 'img/SalaControle.png' %}" alt="Sala de Controle">
             <div class="room-overlay">
-                <div class="room-title">🎯 SALA DE CONTROLE</div>
+                <div class="room-title">SALA DE CONTROLE</div>
                 <div class="room-description">
-                    Centro de operações. Monitore o progresso de todas as missões em tempo real.
-                </div>
-            </div>
-        </div>
-
-        <!-- O ENIGMA DO WORD - Superior Direito (BLOQUEADO) -->
-        <a href="{% url 'word:room' %}" class="room-card room-locked" id="word-room">
-            <span class="status-badge status-locked">🔒 BLOQUEADO</span>
-            <div class="lock-icon">🔒</div>
-            <img src="{% static 'img/WordEnigma.png' %}" alt="Enigma do Word">
-            <div class="room-overlay">
-                <div class="room-title">📄 O ENIGMA DO WORD</div>
-                <div class="room-description">
-                    Arquivos corrompidos precisam ser recuperados. Complete Hardware Lab para desbloquear.
+                    {% if stage == 1 %}⚠ FALHA CRÍTICA IDENTIFICADA. ACESSE PARA DIAGNÓSTICO.{% else %}Sistemas de monitoramento ativos.{% endif %}
                 </div>
             </div>
         </a>
 
-        <!-- LOJA TECH - Inferior Esquerdo (EM BREVE) -->
-        <div class="room-card room-locked" id="tech-store" style="cursor: not-allowed;">
-            <span class="status-badge status-soon">🚧 EM BREVE</span>
-            <div class="lock-icon">🛒</div>
-            <img src="{% static 'img/Loja.png' %}" alt="Loja Tech">
-            <div class="room-overlay">
-                <div class="room-title">🛒 LOJA TECH</div>
-                <div class="room-description">
-                    Marketplace de equipamentos e upgrades. Funcionalidade em desenvolvimento.
+        <!-- 2. LOJA TECH -->
+        {% if stage == 2 %}
+            <a href="{% url 'hardware:store' %}" class="room-card active-card" id="tech-store">
+                <span class="status-badge">REQUISIÇÃO</span>
+                <img src="{% static 'img/Loja.png' %}" alt="Loja Tech">
+                <div class="room-overlay">
+                    <div class="room-title">LOJA TECH</div>
+                    <div class="room-description">O processador está faltando. Adquira um novo imediatamente.</div>
                 </div>
+            </a>
+        {% elif stage > 2 %}
+            <div class="room-card done-card" id="tech-store">
+                <span class="status-badge">COMPLETO</span>
+                <img src="{% static 'img/Loja.png' %}">
             </div>
-        </div>
+        {% else %}
+            <div class="room-card locked-card" id="tech-store">
+                <span class="status-badge">BLOQUEADO</span>
+                <img src="{% static 'img/Loja.png' %}">
+            </div>
+        {% endif %}
 
-        <!-- DESAFIO EXCEL - Inferior Direito (BLOQUEADO) -->
-        <a href="{% url 'excel:room' %}" class="room-card room-locked" id="excel-room">
-            <span class="status-badge status-locked">🔒 BLOQUEADO</span>
-            <div class="lock-icon">🔒</div>
-            <img src="{% static 'img/DesafioExcel.png' %}" alt="Desafio Excel">
-            <div class="room-overlay">
-                <div class="room-title">📊 DESAFIO EXCEL</div>
-                <div class="room-description">
-                    Sistema financeiro travado. Valide transações com fórmulas complexas.
+        <!-- 3. HARDWARE LAB -->
+        {% if stage == 3 %}
+            <a href="{% url 'hardware:room' %}" class="room-card active-card" id="hardware-lab">
+                <span class="status-badge">MONTAGEM</span>
+                <img src="{% static 'img/Hardwarelab.png' %}" alt="Hardware Lab">
+                <div class="room-overlay">
+                    <div class="room-title">HARDWARE LAB</div>
+                    <div class="room-description">A peça chegou. Instale no servidor principal.</div>
                 </div>
+            </a>
+        {% elif stage > 3 %}
+            <div class="room-card done-card" id="hardware-lab">
+                <span class="status-badge">COMPLETO</span>
+                <img src="{% static 'img/Hardwarelab.png' %}">
             </div>
-        </div>
+        {% else %}
+            <div class="room-card locked-card" id="hardware-lab">
+                <span class="status-badge">BLOQUEADO</span>
+                <img src="{% static 'img/Hardwarelab.png' %}">
+            </div>
+        {% endif %}
+
+        <!-- 4. EXCEL -->
+        {% if stage == 4 %}
+            <a href="{% url 'excel:room' %}" class="room-card active-card" id="excel-room">
+                <span class="status-badge">DADOS</span>
+                <img src="{% static 'img/DesafioExcel.png' %}" alt="Excel">
+                <div class="room-overlay">
+                    <div class="room-title">DADOS (EXCEL)</div>
+                    <div class="room-description">Corrija a inconsistência de dados do sistema.</div>
+                </div>
+            </a>
+        {% elif stage > 4 %}
+            <div class="room-card done-card" id="excel-room">
+                <span class="status-badge">COMPLETO</span>
+                <img src="{% static 'img/DesafioExcel.png' %}">
+            </div>
+        {% else %}
+            <div class="room-card locked-card" id="excel-room">
+                <span class="status-badge">BLOQUEADO</span>
+                <img src="{% static 'img/DesafioExcel.png' %}">
+            </div>
+        {% endif %}
+
+        <!-- 5. WORD -->
+        {% if stage == 5 %}
+            <a href="{% url 'word:room' %}" class="room-card active-card" id="word-room">
+                <span class="status-badge">FINAL</span>
+                <img src="{% static 'img/WordEnigma.png' %}" alt="Word">
+                <div class="room-overlay">
+                    <div class="room-title">PROTOCOLO (WORD)</div>
+                    <div class="room-description">Decifre a chave final para liberar a base.</div>
+                </div>
+            </a>
+        {% else %}
+            <div class="room-card locked-card" id="word-room">
+                <span class="status-badge">BLOQUEADO</span>
+                <img src="{% static 'img/WordEnigma.png' %}">
+            </div>
+        {% endif %}
 
     </div>
 </div>
-
-<!-- Script -->
-<script>
-    console.log('✅ Central de Missões carregada');
-
-    // Prevenir clique em salas bloqueadas
-    const lockedRooms = document.querySelectorAll('.room-locked');
-    lockedRooms.forEach(room => {
-        room.addEventListener('click', function(e) {
-            const badge = this.querySelector('.status-badge');
-            if(badge && badge.textContent.includes('BLOQUEADO')) {
-                // Descomente para bloquear acesso:
-                // e.preventDefault();
-                // alert('🔒 Esta missão está bloqueada! Complete a anterior primeiro.');
-            }
-        });
-    });
-
-    // Efeito de shake ao tentar clicar em sala bloqueada
-    lockedRooms.forEach(room => {
-        room.addEventListener('click', function(e) {
-            if(this.classList.contains('room-locked')) {
-                this.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    this.style.animation = '';
-                }, 500);
-            }
-        });
-    });
-
-    // Animação de shake
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Log ao passar mouse
-    const allRooms = document.querySelectorAll('.room-card');
-    allRooms.forEach(room => {
-        room.addEventListener('mouseenter', function() {
-            console.log('🎯 Sala:', this.id);
-        });
-    });
-</script>
 {% endblock %}

@@ -2,17 +2,16 @@ from django.shortcuts import render, redirect
 from .models import WordTerm
 
 def room(request):
-    # Verifica estágio 2
-    if request.session.get('stage', 1) != 2:
+    # Estágio 5: Word
+    if request.session.get('stage', 1) != 5:
         return redirect('core:dashboard')
 
-    # Busca ou Mantém a pergunta
+    # (Lógica da pergunta mantém igual)
     question_id = request.session.get('word_question_id')
-    
     if not question_id:
         term = WordTerm.objects.order_by('?').first()
         if not term:
-            return render(request, 'word/room.html', {'error': 'Sem dados no DB.'})
+            return render(request, 'word/room.html', {'error': 'Sem dados.'})
         request.session['word_question_id'] = term.id
     else:
         try:
@@ -24,15 +23,14 @@ def room(request):
     error = None
     if request.method == 'POST':
         answer = request.POST.get('answer', '').strip().lower()
-        correct = term.term.strip().lower()
-
-        if answer == correct:
-            request.session['stage'] = 3 # Vai para Excel
+        if answer == term.term.strip().lower():
+            # FIM DO JOGO
+            request.session['stage'] = 6 # Vitoria
             if 'word_question_id' in request.session:
                 del request.session['word_question_id']
             request.session.modified = True
-            return redirect('excel:room')
+            return redirect('core:victory')
         else:
-            error = "SINTAXE INVÁLIDA: Comando não reconhecido."
+            error = "COMANDO INCORRETO."
     
     return render(request, 'word/room.html', {'term': term, 'error': error})

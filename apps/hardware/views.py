@@ -1,56 +1,37 @@
 from django.shortcuts import render, redirect
 from .models import Component
-import random
+
+def store(request):
+    # Estágio 2: Loja
+    if request.session.get('stage', 1) != 2:
+        return redirect('core:dashboard')
+
+    if request.method == 'POST':
+        choice = request.POST.get('component_choice')
+        if choice == 'cpu':
+            request.session['stage'] = 3 # Vai pro Lab
+            request.session.modified = True
+            return redirect('core:dashboard')
+        else:
+            return render(request, 'hardware/store.html', {'error': 'Componente errado. O sistema precisa de CÉREBRO (Processamento).'})
+
+    return render(request, 'hardware/store.html')
 
 def room(request):
-    # 1. Segurança: Verifica se o jogador está na fase 1
-    # Se a sessão não tiver 'stage', define como 1 (início)
-    if request.session.get('stage', 1) != 1:
-        return redirect('core:dashboard') # Manda pro painel se não for a fase certa
+    # Estágio 3: Montagem
+    if request.session.get('stage', 1) != 3:
+        return redirect('core:dashboard')
 
-    # 2. Lógica da Pergunta (Persistência)
-    # Verifica se já existe uma pergunta ativa na sessão para esta sala
-    question_id = request.session.get('hardware_question_id')
-    
-    if not question_id:
-        # Se não tem pergunta, sorteia uma do banco
-        component = Component.objects.order_by('?').first()
-        if not component:
-            return render(request, 'hardware/room.html', {'error': 'Banco de dados vazio! Contate o professor.'})
-        
-        # Salva o ID na sessão
-        request.session['hardware_question_id'] = component.id
-    else:
-        # Se já tem, busca ela no banco
-        try:
-            component = Component.objects.get(id=question_id)
-        except Component.DoesNotExist:
-            # Caso o ID seja inválido (ex: deletado do banco), limpa e recarrega
-            del request.session['hardware_question_id']
-            return redirect('hardware:room')
-
-    error = None
-
-    # 3. Processamento da Resposta
     if request.method == 'POST':
-        answer = request.POST.get('answer', '').strip().lower()
-        correct_name = component.name.strip().lower()
-
-        if answer == correct_name:
-            # ACERTOU:
-            # 1. Atualiza o estágio para 2 (Word)
-            request.session['stage'] = 2
-            # 2. Limpa a pergunta atual da sessão para não travar nela se jogar de novo
-            if 'hardware_question_id' in request.session:
-                del request.session['hardware_question_id']
+        action = request.POST.get('action')
+        if action == 'install':
+            request.session['stage'] = 4 # Vai pro Excel
             request.session.modified = True
-            
-            # 3. Redireciona para a próxima sala
-            return redirect('word:room')
-        else:
-            error = "ACESSO NEGADO: Componente incorreto."
+            return redirect('core:dashboard') 
 
-    return render(request, 'hardware/room.html', {
-        'component': component, 
-        'error': error
-    })
+    try:
+        cpu = Component.objects.get(name__icontains="CPU")
+    except:
+        cpu = None
+
+    return render(request, 'hardware/room.html', {'component': cpu})

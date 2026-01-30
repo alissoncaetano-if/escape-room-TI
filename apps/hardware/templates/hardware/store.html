@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Loja Tech{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos do Story Mode (Reutilizável) */
+    .story-overlay {
+        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
+        background: rgba(0,0,0,0.95); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .story-content {
+        display: flex; max-width: 1000px; width: 90%; 
+        background: #161b22; border: 1px solid var(--text-highlight);
+        box-shadow: 0 0 50px rgba(0,255,65,0.1);
+    }
+    .story-img { flex: 1; min-height: 400px; background: #000; position: relative; }
+    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
+    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
+    
+    .puzzle-container { display: none; } /* Começa escondido */
+    
+    .store-card {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        padding: 20px; width: 250px; border-radius: 10px;
+        cursor: pointer; transition: 0.3s; color: #fff;
+    }
+    .store-card:hover {
+        border-color: var(--text-highlight); background: rgba(0, 255, 65, 0.05);
+        transform: translateY(-5px);
+    }
+    .icon { font-size: 3rem; margin-bottom: 15px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- 1. CAMADA DE HISTÓRIA -->
+<div class="story-overlay" id="story-layer">
+    <div class="story-content">
+        <div class="story-img">
+            <!-- COLOQUE SUA IMAGEM DA LOJA AQUI -->
+            <img src="{% static 'img/Loja.png' %}" alt="Interior da Loja">
+        </div>
+        <div class="story-text-area">
+            <div class="story-speaker">>> SISTEMA DE LOGÍSTICA</div>
+            <p class="story-p">
+                "Agente, o orçamento de emergência foi aprovado. O diagnóstico da Sala de Controle confirmou que estamos sem capacidade de processamento.<br><br>
+                Acesse o terminal de compras e selecione o componente capaz de <strong>tomar decisões e realizar cálculos</strong>. Não gaste recursos com peças erradas."
+            </p>
+            <button class="btn" onclick="startPuzzle()">ACESSAR TERMINAL DE VENDAS</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. CAMADA DO PUZZLE (Loja) -->
+<div class="container puzzle-container" id="puzzle-layer" style="text-align: center; padding-top: 40px;">
+    <h1 style="color: var(--text-highlight);">🏪 LOJA TECH - CATÁLOGO</h1>
+    <p style="color: #888; margin-bottom: 30px;">Selecione o componente para envio imediato ao laboratório.</p>
+
+    {% if error %}
+        <div class="error" style="margin-bottom: 20px; padding: 10px; border: 1px solid red;">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post" style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+        {% csrf_token %}
+        
+        <button type="submit" name="component_choice" value="hd" class="store-card">
+            <div class="icon">💾</div>
+            <h3>HD / SSD</h3>
+            <p>Armazenamento de dados.</p>
+        </button>
+
+        <button type="submit" name="component_choice" value="cpu" class="store-card">
+            <div class="icon">🧠</div>
+            <h3>PROCESSADOR</h3>
+            <p>Unidade Central de Processamento.</p>
+        </button>
+
+        <button type="submit" name="component_choice" value="gpu" class="store-card">
+            <div class="icon">🧩</div>
+            <h3>PLACA DE VÍDEO</h3>
+            <p>Renderização gráfica.</p>
+        </button>
+    </form>
+</div>
+
+<script>
+    function startPuzzle() {
+        document.getElementById('story-layer').style.display = 'none';
+        document.getElementById('puzzle-layer').style.display = 'block';
+    }
+    
+    // Se houver erro (o usuário errou e a página recarregou), mostra o puzzle direto
+    {% if error %}
+        startPuzzle();
+    {% endif %}
+</script>
+{% endblock %}

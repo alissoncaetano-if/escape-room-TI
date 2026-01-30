@@ -1,0 +1,240 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Sala de Controle - Diagnóstico{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Layout da Cena */
+    .scene-container {
+        display: flex;
+        height: calc(100vh - 70px);
+        background: url("{% static 'img/SalaControle.png' %}") no-repeat center center;
+        background-size: cover;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Coluna do Agente (Esquerda) */
+    .agent-column {
+        width: 350px;
+        background: rgba(0, 0, 0, 0.85);
+        border-right: 2px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        position: relative;
+        z-index: 20;
+    }
+
+    .agent-img {
+        width: 100%;
+        margin-bottom: -10px;
+        filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.2));
+    }
+
+    /* Caixa de Diálogo */
+    .dialogue-box {
+        background: #0d1117;
+        border-top: 2px solid var(--text-highlight);
+        padding: 20px;
+        min-height: 200px;
+    }
+
+    .speaker { color: var(--text-highlight); font-weight: bold; margin-bottom: 10px; font-family: var(--font-code); }
+    .text { color: #e0e0e0; font-size: 1rem; line-height: 1.5; }
+    
+    .next-btn {
+        margin-top: 15px;
+        float: right;
+        background: var(--text-highlight);
+        color: #000;
+        border: none;
+        padding: 5px 15px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Área do Puzzle (Direita) */
+    .puzzle-area {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        backdrop-filter: blur(5px);
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    /* O Painel de Diagnóstico */
+    .diagnostic-panel {
+        background: #111;
+        border: 2px solid #333;
+        padding: 30px;
+        width: 600px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        display: none; /* Começa escondido */
+    }
+
+    .panel-header {
+        border-bottom: 1px solid #333;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .system-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .sys-module {
+        background: #1a1a1a;
+        padding: 20px;
+        border: 1px solid #444;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .sys-module:hover { background: #222; }
+
+    .status-ok { color: #00ff41; }
+    .status-error { color: #ff3333; animation: blink 1s infinite; }
+
+    @keyframes blink { 50% { opacity: 0.5; } }
+
+    .hidden { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scene-container">
+    
+    <!-- Agente e Narrativa -->
+    <div class="agent-column">
+        <img src="{% static 'img/agente_secret.png' %}" class="agent-img" alt="Agente">
+        
+        <div class="dialogue-box">
+            <div class="speaker" id="speaker">AGENTE LÍDER</div>
+            <div class="text" id="dialogue-text">...</div>
+            <button class="next-btn" onclick="nextStep()">></button>
+        </div>
+    </div>
+
+    <!-- Área de Interação -->
+    <div class="puzzle-area">
+        
+        <!-- Puzzle: Painel de Diagnóstico -->
+        <div id="diagnostic-panel" class="diagnostic-panel">
+            <div class="panel-header">
+                <h2 style="color: #fff; margin: 0;">SISTEMA CENTRAL v9.0</h2>
+                <span style="color: var(--error-red);">STATUS: CRÍTICO</span>
+            </div>
+            
+            <p style="color: #888; margin-bottom: 20px;">>> Clique no módulo defeituoso para iniciar protocolo de reparo.</p>
+
+            <div class="system-grid">
+                <!-- Módulos OK -->
+                <div class="sys-module" onclick="wrongChoice()">
+                    <div style="font-size: 2rem;">🔌</div>
+                    <div>
+                        <strong>FONTE DE ENERGIA</strong><br>
+                        <small class="status-ok">● OPERANTE (100%)</small>
+                    </div>
+                </div>
+
+                <div class="sys-module" onclick="wrongChoice()">
+                    <div style="font-size: 2rem;">💾</div>
+                    <div>
+                        <strong>MEMÓRIA RAM</strong><br>
+                        <small class="status-ok">● OPERANTE (32GB)</small>
+                    </div>
+                </div>
+
+                <div class="sys-module" onclick="wrongChoice()">
+                    <div style="font-size: 2rem;">💿</div>
+                    <div>
+                        <strong>ARMAZENAMENTO</strong><br>
+                        <small class="status-ok">● OPERANTE (4TB)</small>
+                    </div>
+                </div>
+
+                <!-- Módulo com Erro (A Resposta) -->
+                <div class="sys-module" style="border-color: var(--error-red);" onclick="foundError()">
+                    <div style="font-size: 2rem;">🧠</div>
+                    <div>
+                        <strong>PROCESSADOR (CPU)</strong><br>
+                        <small class="status-error">● FALHA CRÍTICA - AUSENTE</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário Oculto para Enviar a Vitória -->
+        <form id="win-form" method="post" class="hidden">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="diagnose_cpu">
+        </form>
+
+    </div>
+</div>
+
+<script>
+    const dialogues = [
+        { s: "AGENTE LÍDER", t: "Bem-vindo à Sala de Controle, recruta. A situação é pior do que pensávamos." },
+        { s: "AGENTE LÍDER", t: "O sistema central caiu logo após o ataque. Nenhuma ordem pode ser processada." },
+        { s: "SISTEMA", t: "⚠️ ALERTA: NÚCLEO DE PROCESSAMENTO NÃO RESPONDE." },
+        { s: "AGENTE LÍDER", t: "Preciso que você acesse o painel manual agora e identifique a fonte exata da falha." },
+        { s: "TUTORIAL", t: "O painel de diagnóstico vai abrir. Clique no componente que está causando o erro." } // Índice 4 -> Abre Painel
+    ];
+
+    let step = 0;
+    const speakerEl = document.getElementById('speaker');
+    const textEl = document.getElementById('dialogue-text');
+    const panelEl = document.getElementById('diagnostic-panel');
+    const btnEl = document.querySelector('.next-btn');
+
+    function render() {
+        speakerEl.innerText = dialogues[step].s;
+        textEl.innerText = dialogues[step].t;
+    }
+
+    function nextStep() {
+        step++;
+        if (step < dialogues.length) {
+            render();
+            if (step === 4) {
+                // Abre o puzzle
+                btnEl.style.display = 'none'; // Esconde botão, força interação com puzzle
+                setTimeout(() => {
+                    panelEl.style.display = 'block';
+                }, 500);
+            }
+        }
+    }
+
+    function wrongChoice() {
+        alert("ERRO: Este módulo está funcionando corretamente. Procure o erro vermelho.");
+    }
+
+    function foundError() {
+        panelEl.style.display = 'none';
+        speakerEl.innerText = "SISTEMA";
+        textEl.innerHTML = "<span style='color:var(--text-highlight)'>DIAGNÓSTICO CONFIRMADO:</span><br>A CPU foi removida fisicamente. Sem ela, o computador não tem 'cérebro'.";
+        btnEl.style.display = 'block';
+        
+        // Altera o comportamento do botão para enviar o form na próxima
+        btnEl.onclick = function() {
+            document.getElementById('win-form').submit();
+        };
+    }
+
+    // Inicia
+    render();
+</script>
+{% endblock %}

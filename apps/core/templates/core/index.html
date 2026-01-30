@@ -1,14 +1,14 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Bem-vindo Agente{% endblock %}
+{% block title %}Acesso Restrito{% endblock %}
 
 {% block extra_css %}
     .story-section {
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 85vh; /* Ocupa quase toda altura */
+        min-height: 85vh;
         padding: 2rem;
         background: radial-gradient(circle at center, #1a202c 0%, #000 100%);
     }
@@ -24,7 +24,6 @@
         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
-    /* Coluna da Imagem */
     .agent-visual {
         flex: 1;
         background: #000;
@@ -39,24 +38,17 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.8;
-        filter: sepia(20%) hue-rotate(90deg) contrast(1.2); /* Efeito verde leve */
+        opacity: 0.9;
+        filter: sepia(20%) hue-rotate(90deg) contrast(1.1);
     }
 
-    .agent-visual::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(to bottom, transparent 80%, var(--bg-card));
-    }
-
-    /* Coluna do Texto */
     .dialogue-area {
         flex: 1.2;
         padding: 3rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        position: relative;
     }
 
     .speaker-label {
@@ -67,54 +59,52 @@
         display: flex;
         align-items: center;
         gap: 10px;
-    }
-    .speaker-label::before {
-        content: '';
-        display: block;
-        width: 10px;
-        height: 10px;
-        background: var(--text-highlight);
-        border-radius: 50%;
-        box-shadow: 0 0 10px var(--text-highlight);
+        text-transform: uppercase;
     }
 
     .typewriter-text {
         font-size: 1.25rem;
-        min-height: 150px;
+        min-height: 160px;
         margin-bottom: 2rem;
         border-left: 2px solid var(--border-color);
         padding-left: 20px;
+        color: #e0e0e0;
     }
-
-    .highlight { color: #fff; font-weight: bold; border-bottom: 2px solid var(--text-highlight); }
 
     .action-area {
         display: flex;
         justify-content: flex-end;
-        gap: 15px;
+    }
+    
+    .alert-blink {
+        animation: blink-red 1s infinite;
+        color: var(--error-red);
+        font-weight: bold;
+    }
+    
+    @keyframes blink-red {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
 {% endblock %}
 
 {% block content %}
 <div class="story-section">
     <div class="story-card">
-        <!-- Lado Esquerdo: Imagem -->
         <div class="agent-visual">
-            <!-- Certifique-se que o arquivo existe em core/static/img/ -->
-            <img src="{% static 'img/agente_secret.png' %}" alt="Agente de Segurança">
+            <img src="{% static 'img/agente_secret.png' %}" alt="Agente">
         </div>
 
-        <!-- Lado Direito: Diálogo -->
         <div class="dialogue-area">
-            <div class="speaker-label">TRANSMISSÃO SEGURA RECEPTADA</div>
+            <div class="speaker-label" id="speaker-label">SISTEMA CENTRAL</div>
             
             <div id="dialogue-box" class="typewriter-text">
-                <!-- O JS vai preencher aqui -->
+                <!-- JS preenche aqui -->
             </div>
 
             <div class="action-area">
-                <button id="btn-next" class="btn" onclick="nextDialogue()">CONTINUAR ></button>
-                <a id="btn-login" href="{% url 'login' %}" class="btn hidden" style="background: var(--text-highlight); color: #000;">ACESSAR SISTEMA</a>
+                <button id="btn-next" class="btn" onclick="nextDialogue()">PRÓXIMO ></button>
+                <a id="btn-login" href="{% url 'login' %}" class="btn hidden" style="background: var(--text-highlight); color: #000;">INICIAR REPARO</a>
             </div>
         </div>
     </div>
@@ -123,39 +113,55 @@
 
 {% block extra_js %}
     const dialogues = [
-        "Agente, temos uma <strong>situação crítica</strong>. O servidor central da Academia foi comprometido.",
-        "Nossa infraestrutura de <strong>Hardware</strong>, arquivos de <strong>Texto</strong> e bancos de <strong>Dados</strong> estão bloqueados por criptografia inimiga.",
-        "Precisamos de alguém com suas habilidades para navegar pelos sistemas de segurança e restaurar a ordem.",
-        "Se você aceitar esta missão, faça login no terminal agora. Boa sorte."
+        {
+            speaker: "SISTEMA - ALERTA",
+            text: "<span class='alert-blink'>⚠ ERRO CRÍTICO: Núcleo de Processamento Offline.</span><br><br>As luzes da base piscam. O alarme ecoa."
+        },
+        {
+            speaker: "DIAGNÓSTICO AUTOMÁTICO",
+            text: "Analisando falha...<br><br>❌ Processador: AUSENTE<br>✔ Memória: OK<br>✔ Energia: OK<br>✔ Armazenamento: OK"
+        },
+        {
+            speaker: "CONTROLE CENTRAL",
+            text: "Agente, sem o processador, o sistema não pensa, não calcula e não decide. Precisamos substituí-lo imediatamente."
+        },
+        {
+            speaker: "CONTROLE CENTRAL",
+            text: "Sua primeira missão é ir à <strong>LOJA TECH</strong> e adquirir o componente correto para restaurar nossa capacidade de processamento."
+        },
+        {
+            speaker: "SISTEMA",
+            text: "Identifique-se no terminal para autorizar a compra e iniciar a operação de resgate."
+        }
     ];
 
     let currentStep = 0;
     const textBox = document.getElementById('dialogue-box');
+    const speakerBox = document.getElementById('speaker-label');
     const btnNext = document.getElementById('btn-next');
     const btnLogin = document.getElementById('btn-login');
 
-    // Função para iniciar
     function renderDialogue() {
-        textBox.innerHTML = dialogues[currentStep];
+        const data = dialogues[currentStep];
+        speakerBox.innerText = data.speaker;
+        textBox.innerHTML = data.text;
     }
 
     function nextDialogue() {
         currentStep++;
         if (currentStep < dialogues.length) {
-            // Efeito simples de fade
             textBox.style.opacity = 0;
             setTimeout(() => {
                 renderDialogue();
                 textBox.style.opacity = 1;
             }, 200);
         } else {
-            // Fim da história
             btnNext.classList.add('hidden');
             btnLogin.classList.remove('hidden');
-            textBox.innerHTML = "<em>[AGUARDANDO CREDENCIAIS DE ACESSO...]</em>";
+            speakerBox.innerText = "ACESSO NECESSÁRIO";
+            textBox.innerHTML = "<em>[AGUARDANDO CREDENCIAIS...]</em>";
         }
     }
 
-    // Inicia
     renderDialogue();
 {% endblock %}

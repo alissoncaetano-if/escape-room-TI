@@ -3,23 +3,36 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 
-# Create your views here.
 def index(request):
     if request.user.is_authenticated:
         return redirect('core:dashboard')
     return render(request, 'core/index.html')
 
-# def register_player(request):
-#     if request.method == 'POST':
-#         #inicia a sessão
-#         request.session['player_name'] = request.POST.get('player_name')
-#         request.session['stage'] = 1 # Estágio 1 = Hardware
-#         return redirect('hardware:room') # Redireciona para o app Hardware
-#     return redirect('core:index')
-
 @login_required
 def dashboard(request):
-    return render(request, 'core/dashboard.html')
+    # Se não tiver estágio, define como 1
+    current_stage = request.session.get('stage', 1)
+    
+    context = {
+        'stage': current_stage,
+        'player_name': request.user.username
+    }
+    return render(request, 'core/dashboard.html', context)
+
+@login_required
+def control_room(request):
+    # Estágio 1: Diagnóstico
+    if request.session.get('stage', 1) != 1:
+        return redirect('core:dashboard')
+
+    if request.method == 'POST':
+        # Se o usuário identificou o erro (CPU)
+        if request.POST.get('action') == 'diagnose_cpu':
+            request.session['stage'] = 2 # Avança para a Loja
+            request.session.modified = True
+            return redirect('core:dashboard')
+
+    return render(request, 'core/control_room.html')
 
 def register(request):
     if request.method == 'POST':
@@ -27,19 +40,12 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            request.session['stage'] = 1
             return redirect('core:dashboard')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
-
-
+@login_required
 def victory(request):
-    # Só acessa se completou o estágio 3 (Excel)
-    # if request.session.get('stage', 0) < 4:
-    #     return redirect('core:index')
-    
-    # return render(request, 'core/victory.html', {
-    #     'name': request.session.get('player_name')
-    # })
     return render(request, 'core/victory.html')

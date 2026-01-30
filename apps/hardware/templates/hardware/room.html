@@ -1,38 +1,87 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Sala de Hardware{% endblock %}
+{% block title %}Hardware Lab{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mesmo CSS de overlay para consistência */
+    .story-overlay {
+        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
+        background: rgba(0,0,0,0.95); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .story-content {
+        display: flex; max-width: 1000px; width: 90%; 
+        background: #161b22; border: 1px solid var(--text-highlight);
+    }
+    .story-img { flex: 1; min-height: 400px; background: #000; }
+    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
+    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
+    
+    .puzzle-container { display: none; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 50px auto; border: 2px solid var(--terminal-green); padding: 20px; background: rgba(0,20,0,0.9);">
-    <h2 style="border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;">>> MÓDULO 1: HARDWARE</h2>
-    
-    <p>O sistema identificou um componente desconectado. Analise a imagem ou a descrição técnica abaixo e insira o <strong>NOME DO COMPONENTE</strong> para religá-lo.</p>
 
-    <div style="text-align: center; margin: 30px 0;">
-        {% if component.image %}
-            <img src="{{ component.image.url }}" alt="Componente Misterioso" style="max-width: 100%; border: 1px solid var(--terminal-green); max-height: 300px;">
-        {% else %}
-            <div style="padding: 50px; border: 1px dashed var(--dim-green); color: var(--dim-green);">
-                [IMAGEM CORROMPIDA]
-            </div>
-        {% endif %}
-        
-        <p style="margin-top: 15px; color: #fff;">
-            <strong>>> LOG DO SISTEMA:</strong><br>
-            <span style="font-family: monospace; color: var(--terminal-green);">"{{ component.description }}"</span>
-        </p>
+<!-- STORYTELLING -->
+<div class="story-overlay" id="story-layer">
+    <div class="story-content">
+        <div class="story-img">
+            <!-- IMAGEM DO LABORATORIO OU BANCADA -->
+            <img src="{% static 'img/Hardwarelab.png' %}" alt="Bancada de Hardware">
+        </div>
+        <div class="story-text-area">
+            <div class="story-speaker">>> IA DO LABORATÓRIO</div>
+            <p class="story-p">
+                "O drone de entrega acaba de deixar o pacote. Temos o Processador em mãos.<br><br>
+                A placa-mãe está exposta na bancada. Esta é uma operação delicada, Agente. Um pino torto e perdemos o sistema para sempre.<br><br>
+                Prepare-se para a instalação física."
+            </p>
+            <button class="btn" onclick="startPuzzle()">INICIAR MONTAGEM</button>
+        </div>
+    </div>
+</div>
+
+<!-- PUZZLE (Montagem) -->
+<div class="container puzzle-container" id="puzzle-layer" style="max-width: 800px; margin-top: 40px;">
+    <h1 style="color: var(--text-highlight); border-bottom: 1px dashed #333; padding-bottom: 15px;">
+        🧪 HARDWARE LAB - INSTALAÇÃO
+    </h1>
+    
+    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 30px; background: #111; padding: 20px; border: 1px solid #333;">
+        <div style="flex: 1;">
+            <h3 style="color: #fff; margin-top: 0;">PROCEDIMENTO PADRÃO:</h3>
+            <ul style="color: #ccc; list-style: none; padding: 0; line-height: 2;">
+                <li>1. 🔓 Abrir a alavanca do soquete (ZIF).</li>
+                <li>2. 📐 Alinhar o triângulo dourado do processador.</li>
+                <li>3. ⬇️ Inserir sem exercer pressão.</li>
+                <li>4. 🔒 Travar a alavanca de segurança.</li>
+            </ul>
+        </div>
+        <div style="flex: 1; text-align: center;">
+            <!-- Pode substituir por um GIF de montagem se tiver -->
+            <div style="font-size: 5rem; margin-bottom: 10px;">🧠</div>
+            <p style="color: var(--text-highlight);">CPU PRONTA PARA ENCAIXE</p>
+        </div>
     </div>
 
     <form method="post">
         {% csrf_token %}
-        <label>DIGITE O NOME DA PEÇA:</label>
-        <input type="text" name="answer" placeholder="Ex: Mouse" required autocomplete="off" autofocus>
-        
-        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">CONECTAR COMPONENTE</button>
+        <input type="hidden" name="action" value="install">
+        <button type="submit" class="btn" style="width: 100%; padding: 20px; font-size: 1.2rem; background: var(--text-highlight); color: #000;">
+            [EXECUTAR] FINALIZAR MONTAGEM E LIGAR
+        </button>
     </form>
-
-    {% if error %}
-        <p style="color: var(--error-red); margin-top: 15px; text-align: center;">>> {{ error }}</p>
-    {% endif %}
 </div>
+
+<script>
+    function startPuzzle() {
+        document.getElementById('story-layer').style.display = 'none';
+        document.getElementById('puzzle-layer').style.display = 'block';
+    }
+</script>
 {% endblock %}

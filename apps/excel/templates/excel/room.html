@@ -1,34 +1,90 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Sala Excel{% endblock %}
+{% block title %}Desafio Excel{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Overlay Padrão */
+    .story-overlay {
+        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
+        background: rgba(0,0,0,0.95); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .story-content {
+        display: flex; max-width: 1000px; width: 90%; 
+        background: #161b22; border: 1px solid var(--text-highlight);
+    }
+    .story-img { flex: 1; min-height: 400px; background: #000; }
+    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
+    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
+    
+    .puzzle-container { display: none; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 50px auto; border: 2px solid var(--terminal-green); padding: 20px; background: rgba(0,20,0,0.9);">
-    <h2 style="border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;">>> MÓDULO 3: FINANCEIRO</h2>
-    
-    <p>A planilha de custos travou. Analise a situação e digite a <strong>FÓRMULA COMPLETA</strong> para resolver o problema.</p>
 
-    <div style="margin: 30px 0;">
-        {% if challenge.data_preview %}
-            <img src="{{ challenge.data_preview.url }}" alt="Planilha" style="max-width: 100%; border: 1px solid var(--terminal-green); margin-bottom: 15px;">
-        {% endif %}
-        
-        <div style="background: #111; padding: 15px; border: 1px dashed var(--dim-green);">
-            <strong style="color: var(--terminal-green);">>> CENÁRIO:</strong>
-            <p style="color: #fff;">{{ challenge.scenario }}</p>
+<!-- STORYTELLING -->
+<div class="story-overlay" id="story-layer">
+    <div class="story-content">
+        <div class="story-img">
+            <!-- IMAGEM DE MONITORES COM DADOS ERRADOS/VERMELHOS -->
+            <img src="{% static 'img/DesafioExcel.png' %}" alt="Monitores com Erro">
+        </div>
+        <div class="story-text-area">
+            <div class="story-speaker">>> ALERTA DE INTEGRIDADE</div>
+            <p class="story-p">
+                "Hardware online. Inicializando sistema operacional...<br>
+                <span style="color: #ff3333;">[ERRO] Inconsistência na base de dados financeira.</span><br><br>
+                Agente, o processador funciona, mas os dados estão corrompidos. O sistema está calculando prejuízos milionários incorretamente. Use suas habilidades em Planilhas para corrigir as fórmulas e estabilizar o núcleo."
+            </p>
+            <button class="btn" onclick="startPuzzle()">ANALISAR DADOS</button>
         </div>
     </div>
-
-    <form method="post">
-        {% csrf_token %}
-        <label>INSIRA A FÓRMULA (Comece com =):</label>
-        <input type="text" name="answer" placeholder="Ex: =SOMA(A1:B2)" required autocomplete="off" autofocus>
-        
-        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">RECALCULAR DADOS</button>
-    </form>
-
-    {% if error %}
-        <p style="color: var(--error-red); margin-top: 15px; text-align: center;">>> {{ error }}</p>
-    {% endif %}
 </div>
+
+<!-- PUZZLE (Pergunta) -->
+<div class="container puzzle-container" id="puzzle-layer" style="max-width: 900px; margin-top: 40px;">
+    <h1 style="color: var(--text-highlight);">📊 DEPARTAMENTO FINANCEIRO - CORREÇÃO</h1>
+    
+    <div style="display: flex; gap: 30px; margin-top: 30px;">
+        <div style="flex: 1.5;">
+            <!-- Imagem do desafio do banco de dados -->
+            {% if challenge.data_preview %}
+                <img src="{{ challenge.data_preview.url }}" style="width: 100%; border: 2px solid #444; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+            {% else %}
+                <div style="height: 250px; background: #222; border: 2px dashed #555; display: flex; align-items: center; justify-content: center; color: #777;">
+                    [IMAGEM DA TABELA EXCEL AQUI]
+                </div>
+            {% endif %}
+        </div>
+        
+        <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+            <h3 style="color: #fff; margin-top: 0;">SITUAÇÃO ENCONTRADA:</h3>
+            <p style="color: #ccc; font-style: italic; margin-bottom: 20px;">"{{ challenge.scenario }}"</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <label>INSIRA A FÓRMULA CORRETA:</label>
+                <input type="text" name="answer" placeholder="Ex: =SOMA(A1:A5)" autofocus autocomplete="off">
+                <button type="submit" class="btn" style="width: 100%;">RECALCULAR</button>
+            </form>
+            
+            {% if error %}
+                <p class="error" style="margin-top: 15px;">❌ {{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function startPuzzle() {
+        document.getElementById('story-layer').style.display = 'none';
+        document.getElementById('puzzle-layer').style.display = 'block';
+    }
+    {% if error %} startPuzzle(); {% endif %}
+</script>
 {% endblock %}

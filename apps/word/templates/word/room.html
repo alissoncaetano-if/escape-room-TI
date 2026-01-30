@@ -1,29 +1,82 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
-{% block title %}Sala Word{% endblock %}
+{% block title %}Enigma Word{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Overlay Padrão */
+    .story-overlay {
+        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
+        background: rgba(0,0,0,0.95); z-index: 2000;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .story-content {
+        display: flex; max-width: 1000px; width: 90%; 
+        background: #161b22; border: 1px solid var(--text-highlight);
+    }
+    .story-img { flex: 1; min-height: 400px; background: #000; }
+    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
+    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
+    
+    .puzzle-container { display: none; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 50px auto; border: 2px solid var(--terminal-green); padding: 20px; background: rgba(0,20,0,0.9);">
-    <h2 style="border-bottom: 1px dashed var(--dim-green); padding-bottom: 10px;">>> MÓDULO 2: DOCUMENTAÇÃO</h2>
-    
-    <p>O arquivo de texto perdeu a formatação. O sistema fornece uma definição técnica. Digite o <strong>NOME DA FERRAMENTA</strong> do Word correspondente.</p>
 
-    <div style="margin: 30px 0; padding: 20px; background: #000; border-left: 4px solid var(--terminal-green);">
-        <p style="color: var(--dim-green);">// DICA DE RECUPERAÇÃO:</p>
-        <h3 style="color: #fff; font-size: 1.5rem;">"{{ term.clue }}"</h3>
-        <small style="color: #666;">Categoria: {{ term.category }}</small>
+<!-- STORYTELLING -->
+<div class="story-overlay" id="story-layer">
+    <div class="story-content">
+        <div class="story-img">
+            <!-- IMAGEM DE DOCUMENTOS/CRIPTOGRAFIA -->
+            <img src="{% static 'img/WordEnigma.png' %}" alt="Documentos Secretos">
+        </div>
+        <div class="story-text-area">
+            <div class="story-speaker">>> CONTROLE CENTRAL</div>
+            <p class="story-p">
+                "Excelente trabalho com os dados, Agente. O sistema está 98% operacional.<br><br>
+                Porém, o <strong>Protocolo de Liberação Final</strong> está protegido por uma formatação caótica. O arquivo de texto é ilegível para a IA.<br><br>
+                Use seu conhecimento de edição de texto para identificar o comando necessário e destravar a base."
+            </p>
+            <button class="btn" onclick="startPuzzle()">ABRIR ARQUIVO CRIPTOGRAFADO</button>
+        </div>
+    </div>
+</div>
+
+<!-- PUZZLE (Pergunta Word) -->
+<div class="container puzzle-container" id="puzzle-layer" style="max-width: 800px; margin-top: 40px;">
+    <h1 style="color: var(--text-highlight);">📝 ARQUIVO DE SEGURANÇA - PROTOCOLO FINAL</h1>
+    
+    <div style="background: #161b22; padding: 30px; border-left: 4px solid var(--text-highlight); margin: 30px 0; position: relative;">
+        <span style="position: absolute; top: -10px; left: 10px; background: var(--text-highlight); color: #000; padding: 2px 8px; font-weight: bold; font-size: 0.8rem;">DICA TÉCNICA</span>
+        
+        <h2 style="margin-top: 10px; color: #fff; font-family: 'Times New Roman', serif;">"{{ term.clue }}"</h2>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; color: #888; font-size: 0.9rem;">
+            CATEGORIA DO COMANDO: <span style="color: #ccc;">{{ term.category }}</span>
+        </div>
     </div>
 
     <form method="post">
         {% csrf_token %}
-        <label>COMANDO / FERRAMENTA:</label>
-        <input type="text" name="answer" placeholder="Ex: Negrito" required autocomplete="off" autofocus>
-        
-        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">EXECUTAR COMANDO</button>
+        <label>QUAL FERRAMENTA / COMANDO RESOLVE ISSO?</label>
+        <input type="text" name="answer" placeholder="Digite o nome do comando..." autofocus autocomplete="off">
+        <button type="submit" class="btn" style="width: 100%;">DESCRIPTOGRAFAR E VENCER</button>
     </form>
 
     {% if error %}
-        <p style="color: var(--error-red); margin-top: 15px; text-align: center;">>> {{ error }}</p>
+        <p class="error" style="text-align: center; margin-top: 20px;">🚫 ACESSO NEGADO: {{ error }}</p>
     {% endif %}
 </div>
+
+<script>
+    function startPuzzle() {
+        document.getElementById('story-layer').style.display = 'none';
+        document.getElementById('puzzle-layer').style.display = 'block';
+    }
+    {% if error %} startPuzzle(); {% endif %}
+</script>
 {% endblock %}
