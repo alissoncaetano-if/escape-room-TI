@@ -5,35 +5,323 @@
 
 {% block extra_css %}
 <style>
-    /* Estilos do Story Mode (Reutilizável) */
+    /* Variáveis */
+    :root {
+        --neon-green: #00ff41;
+        --dark-bg: #0a0e12;
+        --panel-bg: #0d1117;
+        --border-color: #1a2332;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+    }
+
+    /* Story Mode Melhorado */
     .story-overlay {
-        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
-        background: rgba(0,0,0,0.95); z-index: 2000;
-        display: flex; align-items: center; justify-content: center;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(10, 14, 18, 0.95) 100%);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
     }
+
     .story-content {
-        display: flex; max-width: 1000px; width: 90%; 
-        background: #161b22; border: 1px solid var(--text-highlight);
-        box-shadow: 0 0 50px rgba(0,255,65,0.1);
+        display: flex;
+        max-width: 1100px;
+        width: 95%;
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 2px solid var(--neon-green);
+        box-shadow: 
+            0 0 50px rgba(0, 255, 65, 0.2),
+            inset 0 0 30px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        animation: storyAppear 0.6s ease-out;
     }
-    .story-img { flex: 1; min-height: 400px; background: #000; position: relative; }
-    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
-    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
-    
-    .puzzle-container { display: none; } /* Começa escondido */
-    
+
+    @keyframes storyAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Área da Imagem */
+    .story-img {
+        flex: 1;
+        min-height: 450px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-img::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+        z-index: 1;
+    }
+
+    .story-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.85;
+        transition: transform 0.3s ease;
+    }
+
+    .story-img:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Área do Texto */
+    .story-text-area {
+        flex: 1;
+        padding: 50px 45px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(90deg, rgba(13, 17, 23, 0.95) 0%, rgba(22, 27, 34, 0.98) 100%);
+    }
+
+    .story-speaker {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+    }
+
+    .story-speaker::before {
+        content: '▶';
+        margin-right: 10px;
+        font-size: 1rem;
+        animation: blink-speaker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink-speaker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .story-p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-primary);
+        margin-bottom: 35px;
+        padding-left: 20px;
+        border-left: 3px solid var(--neon-green);
+        position: relative;
+    }
+
+    .story-p strong {
+        color: var(--neon-green);
+        font-weight: 600;
+    }
+
+    /* Botão do Story */
+    /*.story-text-area .btn {
+        background: linear-gradient(135deg, var(--neon-green) 0%, #00cc35 100%);
+        color: #000;
+        border: none;
+        padding: 15px 35px;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+        cursor: pointer;
+        font-size: 0.95rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 255, 65, 0.3);
+        position: relative;
+        overflow: hidden;
+        align-self: flex-start;
+    }
+
+    .story-text-area .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .story-text-area .btn:hover::before {
+        left: 100%;
+    }
+
+    .story-text-area .btn:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 30px rgba(0, 255, 65, 0.5);
+    }
+
+    .story-text-area .btn:active {
+        transform: translateX(3px);
+    }*/
+
+    /* Container do Puzzle */
+    .puzzle-container {
+        display: none;
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(180deg, var(--dark-bg) 0%, #000 100%);
+        padding: 60px 20px;
+    }
+
+    .puzzle-container h1 {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+        text-align: center;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .puzzle-container > p {
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+        text-align: center;
+        font-size: 1.05rem;
+    }
+
+    /* Cards da Loja */
     .store-card {
-        background: var(--bg-card); border: 1px solid var(--border-color);
-        padding: 20px; width: 250px; border-radius: 10px;
-        cursor: pointer; transition: 0.3s; color: #fff;
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        border: 2px solid #333;
+        padding: 30px 25px;
+        width: 280px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
     }
+
+    .store-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .store-card:hover::before {
+        left: 100%;
+    }
+
     .store-card:hover {
-        border-color: var(--text-highlight); background: rgba(0, 255, 65, 0.05);
-        transform: translateY(-5px);
+        border-color: var(--neon-green);
+        background: linear-gradient(135deg, #222 0%, #151515 100%);
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0, 255, 65, 0.2);
     }
-    .icon { font-size: 3rem; margin-bottom: 15px; }
+
+    .store-card .icon {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        display: block;
+        text-align: center;
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+
+    .store-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .store-card p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        text-align: center;
+        margin: 0;
+    }
+
+    /* Mensagem de Erro */
+    .error {
+        margin-bottom: 30px;
+        padding: 15px 25px;
+        border: 2px solid #ff3b3b;
+        background: rgba(255, 59, 59, 0.1);
+        color: #ff3b3b;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        text-align: center;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+        .story-content {
+            flex-direction: column;
+        }
+
+        .story-img {
+            min-height: 300px;
+        }
+
+        .story-text-area {
+            padding: 35px 30px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .story-text-area {
+            padding: 25px 20px;
+        }
+
+        .story-p {
+            font-size: 1rem;
+        }
+
+        .puzzle-container h1 {
+            font-size: 1.6rem;
+        }
+
+        .store-card {
+            width: 100%;
+            max-width: 320px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -43,11 +331,10 @@
 <div class="story-overlay" id="story-layer">
     <div class="story-content">
         <div class="story-img">
-            <!-- COLOQUE SUA IMAGEM DA LOJA AQUI -->
             <img src="{% static 'img/Loja.png' %}" alt="Interior da Loja">
         </div>
         <div class="story-text-area">
-            <div class="story-speaker">>> SISTEMA DE LOGÍSTICA</div>
+            <div class="story-speaker">SISTEMA DE LOGÍSTICA</div>
             <p class="story-p">
                 "Agente, o orçamento de emergência foi aprovado. O diagnóstico da Sala de Controle confirmou que estamos sem capacidade de processamento.<br><br>
                 Acesse o terminal de compras e selecione o componente capaz de <strong>tomar decisões e realizar cálculos</strong>. Não gaste recursos com peças erradas."
@@ -58,12 +345,12 @@
 </div>
 
 <!-- 2. CAMADA DO PUZZLE (Loja) -->
-<div class="container puzzle-container" id="puzzle-layer" style="text-align: center; padding-top: 40px;">
-    <h1 style="color: var(--text-highlight);">🏪 LOJA TECH - CATÁLOGO</h1>
-    <p style="color: #888; margin-bottom: 30px;">Selecione o componente para envio imediato ao laboratório.</p>
+<div class="container puzzle-container" id="puzzle-layer">
+    <h1>🏪 LOJA TECH - CATÁLOGO</h1>
+    <p>Selecione o componente para envio imediato ao laboratório.</p>
 
     {% if error %}
-        <div class="error" style="margin-bottom: 20px; padding: 10px; border: 1px solid red;">⚠ {{ error }}</div>
+        <div class="error">⚠ {{ error }}</div>
     {% endif %}
 
     <form method="post" style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">

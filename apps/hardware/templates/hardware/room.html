@@ -5,23 +5,259 @@
 
 {% block extra_css %}
 <style>
-    /* Mesmo CSS de overlay para consistência */
+    /* Variáveis */
+    :root {
+        --neon-green: #00ff41;
+        --dark-bg: #0a0e12;
+        --panel-bg: #0d1117;
+        --border-color: #1a2332;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+    }
+
+    /* Story Mode Melhorado */
     .story-overlay {
-        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
-        background: rgba(0,0,0,0.95); z-index: 2000;
-        display: flex; align-items: center; justify-content: center;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(10, 14, 18, 0.95) 100%);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
     }
+
     .story-content {
-        display: flex; max-width: 1000px; width: 90%; 
-        background: #161b22; border: 1px solid var(--text-highlight);
+        display: flex;
+        max-width: 1100px;
+        width: 95%;
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 2px solid var(--neon-green);
+        box-shadow: 
+            0 0 50px rgba(0, 255, 65, 0.2),
+            inset 0 0 30px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        animation: storyAppear 0.6s ease-out;
     }
-    .story-img { flex: 1; min-height: 400px; background: #000; }
-    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
-    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
-    
-    .puzzle-container { display: none; }
+
+    @keyframes storyAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Área da Imagem */
+    .story-img {
+        flex: 1;
+        min-height: 450px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-img::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+        z-index: 1;
+    }
+
+    .story-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.85;
+        transition: transform 0.3s ease;
+    }
+
+    .story-img:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Área do Texto */
+    .story-text-area {
+        flex: 1;
+        padding: 50px 45px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(90deg, rgba(13, 17, 23, 0.95) 0%, rgba(22, 27, 34, 0.98) 100%);
+    }
+
+    .story-speaker {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+    }
+
+    .story-speaker::before {
+        content: '▶';
+        margin-right: 10px;
+        font-size: 1rem;
+        animation: blink-speaker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink-speaker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .story-p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-primary);
+        margin-bottom: 35px;
+        padding-left: 20px;
+        border-left: 3px solid var(--neon-green);
+        position: relative;
+    }
+
+    .story-p strong {
+        color: var(--neon-green);
+        font-weight: 600;
+    }
+
+    /* Container do Puzzle */
+    .puzzle-container {
+        display: none;
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(180deg, var(--dark-bg) 0%, #000 100%);
+        padding: 60px 20px;
+    }
+
+    .puzzle-container h1 {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        border-bottom: 2px solid #333;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+
+    /* Painel de Procedimento */
+    .procedure-panel {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+        margin-bottom: 40px;
+        background: linear-gradient(135deg, #111 0%, #0a0a0a 100%);
+        padding: 30px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .procedure-steps {
+        flex: 1;
+    }
+
+    .procedure-steps h3 {
+        color: #fff;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+    }
+
+    .procedure-steps ul {
+        color: #ccc;
+        list-style: none;
+        padding: 0;
+        line-height: 2.2;
+    }
+
+    .procedure-steps li {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .procedure-steps li:hover {
+        color: var(--neon-green);
+        padding-left: 10px;
+    }
+
+    .procedure-visual {
+        flex: 1;
+        text-align: center;
+    }
+
+    .procedure-visual .cpu-icon {
+        font-size: 5rem;
+        margin-bottom: 15px;
+        display: block;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.3));
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .procedure-visual p {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+        .story-content {
+            flex-direction: column;
+        }
+
+        .story-img {
+            min-height: 300px;
+        }
+
+        .story-text-area {
+            padding: 35px 30px;
+        }
+
+        .procedure-panel {
+            flex-direction: column;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .story-text-area {
+            padding: 25px 20px;
+        }
+
+        .story-p {
+            font-size: 1rem;
+        }
+
+        .procedure-panel {
+            padding: 20px;
+        }
+
+        .procedure-visual .cpu-icon {
+            font-size: 4rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -31,11 +267,10 @@
 <div class="story-overlay" id="story-layer">
     <div class="story-content">
         <div class="story-img">
-            <!-- IMAGEM DO LABORATORIO OU BANCADA -->
             <img src="{% static 'img/Hardwarelab.png' %}" alt="Bancada de Hardware">
         </div>
         <div class="story-text-area">
-            <div class="story-speaker">>> IA DO LABORATÓRIO</div>
+            <div class="story-speaker">IA DO LABORATÓRIO</div>
             <p class="story-p">
                 "O drone de entrega acaba de deixar o pacote. Temos o Processador em mãos.<br><br>
                 A placa-mãe está exposta na bancada. Esta é uma operação delicada, Agente. Um pino torto e perdemos o sistema para sempre.<br><br>
@@ -52,20 +287,19 @@
         🧪 HARDWARE LAB - INSTALAÇÃO
     </h1>
     
-    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 30px; background: #111; padding: 20px; border: 1px solid #333;">
-        <div style="flex: 1;">
-            <h3 style="color: #fff; margin-top: 0;">PROCEDIMENTO PADRÃO:</h3>
-            <ul style="color: #ccc; list-style: none; padding: 0; line-height: 2;">
+    <div class="procedure-panel">
+        <div class="procedure-steps">
+            <h3>PROCEDIMENTO PADRÃO:</h3>
+            <ul>
                 <li>1. 🔓 Abrir a alavanca do soquete (ZIF).</li>
                 <li>2. 📐 Alinhar o triângulo dourado do processador.</li>
                 <li>3. ⬇️ Inserir sem exercer pressão.</li>
                 <li>4. 🔒 Travar a alavanca de segurança.</li>
             </ul>
         </div>
-        <div style="flex: 1; text-align: center;">
-            <!-- Pode substituir por um GIF de montagem se tiver -->
-            <div style="font-size: 5rem; margin-bottom: 10px;">🧠</div>
-            <p style="color: var(--text-highlight);">CPU PRONTA PARA ENCAIXE</p>
+        <div class="procedure-visual">
+            <span class="cpu-icon">🧠</span>
+            <p>CPU PRONTA PARA ENCAIXE</p>
         </div>
     </div>
 

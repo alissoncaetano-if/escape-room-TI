@@ -5,54 +5,240 @@
 
 {% block extra_css %}
 <style>
-    /* Layout da Cena */
+    :root {
+        --neon-green: #00ff41;
+        --dark-bg: #0a0e12;
+        --panel-bg: #0d1117;
+        --border-color: #1a2332;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --error-red: #ff3b3b;
+        --success-green: #00ff41;
+        --warning-yellow: #ffd700;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Layout Principal */
     .scene-container {
         display: flex;
-        height: calc(100vh - 70px);
-        background: url("{% static 'img/SalaControle.png' %}") no-repeat center center;
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(180deg, rgba(10, 14, 18, 0.95) 0%, rgba(0, 0, 0, 0.98) 100%),
+                    url("{% static 'img/SalaControle.png' %}") no-repeat center center;
         background-size: cover;
+        background-blend-mode: multiply;
         position: relative;
         overflow: hidden;
     }
 
+    /* Efeito de Escaneamento */
+    .scene-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(transparent 0%, rgba(0, 255, 65, 0.03) 50%, transparent 100%);
+        animation: scan 8s linear infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @keyframes scan {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+    }
+
+    /* Grade de Fundo */
+    .scene-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+        background-size: 50px 50px;
+        pointer-events: none;
+        opacity: 0.3;
+        z-index: 1;
+    }
+
     /* Coluna do Agente (Esquerda) */
     .agent-column {
-        width: 350px;
-        background: rgba(0, 0, 0, 0.85);
-        border-right: 2px solid var(--border-color);
+        width: 650px;
+        background: linear-gradient(90deg, rgba(10, 14, 18, 0.98) 0%, rgba(13, 17, 23, 0.95) 100%);
+        border-right: 2px solid var(--neon-green);
+        box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
+        justify-content: space-between;
         position: relative;
         z-index: 20;
+        overflow: hidden;
+    }
+
+    /* Container da Imagem do Agente */
+    .agent-image-container {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 65, 0.05) 100%);
     }
 
     .agent-img {
         width: 100%;
-        margin-bottom: -10px;
-        filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.2));
+        max-width: 420px;
+        height: auto;
+        filter: drop-shadow(0 0 20px rgba(0, 255, 65, 0.3));
+        transition: transform 0.3s ease;
+    }
+
+    .agent-img:hover {
+        transform: scale(1.02);
+    }
+
+    /* Indicador de Status do Agente */
+    .agent-status {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid var(--neon-green);
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        color: var(--neon-green);
+        letter-spacing: 1px;
+    }
+
+    .agent-status::before {
+        content: '●';
+        display: inline-block;
+        margin-right: 8px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
     }
 
     /* Caixa de Diálogo */
     .dialogue-box {
-        background: #0d1117;
-        border-top: 2px solid var(--text-highlight);
-        padding: 20px;
-        min-height: 200px;
+        background: linear-gradient(180deg, #0d1117 0%, #0a0e12 100%);
+        border-top: 2px solid var(--neon-green);
+        padding: 30px;
+        min-height: 500px;
+        position: relative;
+        box-shadow: 0 -10px 30px rgba(0, 255, 65, 0.1);
     }
 
-    .speaker { color: var(--text-highlight); font-weight: bold; margin-bottom: 10px; font-family: var(--font-code); }
-    .text { color: #e0e0e0; font-size: 1rem; line-height: 1.5; }
-    
+    .dialogue-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+        animation: glow 3s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    .speaker {
+        color: var(--neon-green);
+        font-weight: bold;
+        font-size: 3rem;
+        margin-bottom: 15px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+    }
+
+    .speaker::before {
+        content: '▶';
+        margin-right: 10px;
+        font-size: 1rem;
+        animation: blink-arrow 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink-arrow {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .text {
+        color: var(--text-primary);
+        font-size: 2rem;
+        line-height: 1.8;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        text-align: left;
+        min-height: 80px;
+        margin-bottom: 10px;
+    }
+
     .next-btn {
-        margin-top: 15px;
-        float: right;
-        background: var(--text-highlight);
-        color: #000;
-        border: none;
-        padding: 5px 15px;
+        display: inline-block;
+        background: rgba(0, 255, 65, 0.1);
+        border: 1px solid var(--text-highlight);
+        color: var(--text-highlight);
+        padding: 12px 24px;
+        font-family: var(--font-code);
         font-weight: bold;
         cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        text-align: center;
+        border-radius: 4px;
+    }
+    .next-btn:hover {
+            background: var(--text-highlight);
+            color: #000;
+            box-shadow: 0 0 15px var(--text-highlight);
+        }
+
+    /*.next-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .next-btn:hover::before {
+        left: 100%;
+    }*/
+
+    .next-btn:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 25px rgba(0, 255, 65, 0.5);
+        background: linear-gradient(135deg, #00ff41 0%, #00ff41 100%);
+    }
+
+    .next-btn:active {
+        transform: translateX(3px);
+        box-shadow: 0 2px 10px rgba(0, 255, 65, 0.4);
     }
 
     /* Área do Puzzle (Direita) */
@@ -62,53 +248,272 @@
         align-items: center;
         justify-content: center;
         position: relative;
-        backdrop-filter: blur(5px);
-        background: rgba(0, 0, 0, 0.6);
+        z-index: 10;
+        padding: 40px;
     }
 
-    /* O Painel de Diagnóstico */
+    /* Mensagem de Aguarde */
+    .waiting-message {
+        text-align: center;
+        color: var(--text-secondary);
+        font-family: 'Courier New', monospace;
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+        animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+
+    /* Painel de Diagnóstico */
     .diagnostic-panel {
-        background: #111;
-        border: 2px solid #333;
-        padding: 30px;
-        width: 600px;
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-        display: none; /* Começa escondido */
+        background: linear-gradient(135deg, #0d1117 0%, #0a0e12 100%);
+        border: 2px solid var(--neon-green);
+        border-radius: 8px;
+        padding: 40px;
+        width: 100%;
+        max-width: 700px;
+        box-shadow: 
+            0 0 50px rgba(0, 255, 65, 0.2),
+            inset 0 0 30px rgba(0, 0, 0, 0.5);
+        display: none;
+        animation: panelAppear 0.5s ease-out;
+        position: relative;
+    }
+
+    @keyframes panelAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Cantos Decorativos do Painel */
+    .diagnostic-panel::before,
+    .diagnostic-panel::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--neon-green);
+    }
+
+    .diagnostic-panel::before {
+        top: 10px;
+        left: 10px;
+        border-right: none;
+        border-bottom: none;
+    }
+
+    .diagnostic-panel::after {
+        bottom: 10px;
+        right: 10px;
+        border-left: none;
+        border-top: none;
     }
 
     .panel-header {
-        border-bottom: 1px solid #333;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 20px;
+        margin-bottom: 30px;
         display: flex;
         justify-content: space-between;
+        align-items: center;
     }
 
+    .panel-header h2 {
+        color: var(--text-primary);
+        margin: 0;
+        font-family: 'Courier New', monospace;
+        font-size: 1.4rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .panel-header .status-badge {
+        background: rgba(255, 59, 59, 0.2);
+        border: 1px solid var(--error-red);
+        padding: 8px 16px;
+        border-radius: 4px;
+        color: var(--error-red);
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        animation: blink 1.5s infinite;
+    }
+
+    .panel-instruction {
+        color: var(--text-secondary);
+        margin-bottom: 25px;
+        font-size: 0.9rem;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        padding: 12px;
+        background: rgba(0, 255, 65, 0.05);
+        border-left: 3px solid var(--neon-green);
+    }
+
+    /* Grid de Módulos */
     .system-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 20px;
     }
 
     .sys-module {
-        background: #1a1a1a;
-        padding: 20px;
-        border: 1px solid #444;
+        background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+        padding: 25px;
+        border: 2px solid #333;
+        border-radius: 6px;
         cursor: pointer;
-        transition: 0.3s;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
     }
 
-    .sys-module:hover { background: #222; }
+    .sys-module::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        transition: left 0.5s;
+    }
 
-    .status-ok { color: #00ff41; }
-    .status-error { color: #ff3333; animation: blink 1s infinite; }
+    .sys-module:hover::before {
+        left: 100%;
+    }
 
-    @keyframes blink { 50% { opacity: 0.5; } }
+    .sys-module:hover {
+        background: linear-gradient(135deg, #222 0%, #151515 100%);
+        border-color: var(--neon-green);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 255, 65, 0.15);
+    }
 
-    .hidden { display: none; }
+    .sys-module-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+
+    .sys-module-info {
+        flex: 1;
+    }
+
+    .sys-module-info strong {
+        display: block;
+        color: var(--text-primary);
+        font-size: 1rem;
+        margin-bottom: 8px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+    }
+
+    .sys-module-info small {
+        font-size: 0.85rem;
+        font-family: 'Courier New', monospace;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-ok {
+        color: var(--success-green);
+    }
+
+    .status-error {
+        color: var(--error-red);
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0.3; }
+    }
+
+    /* Módulo com Erro */
+    .sys-module.error-module {
+        border-color: var(--error-red);
+        background: linear-gradient(135deg, rgba(255, 59, 59, 0.1) 0%, rgba(139, 0, 0, 0.05) 100%);
+        box-shadow: 0 0 20px rgba(255, 59, 59, 0.2);
+    }
+
+    .sys-module.error-module:hover {
+        border-color: var(--error-red);
+        box-shadow: 0 8px 30px rgba(255, 59, 59, 0.4);
+    }
+
+    /* Utilitários */
+    .hidden {
+        display: none !important;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+        .scene-container {
+            flex-direction: column;
+        }
+
+        .agent-column {
+            width: 100%;
+            border-right: none;
+            border-bottom: 2px solid var(--neon-green);
+            max-height: 400px;
+        }
+
+        .agent-image-container {
+            padding: 15px;
+        }
+
+        .agent-img {
+            max-width: 200px;
+        }
+
+        .puzzle-area {
+            padding: 20px;
+        }
+
+        .diagnostic-panel {
+            padding: 25px;
+        }
+
+        .system-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .dialogue-box {
+            padding: 20px;
+        }
+
+        .panel-header {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.1rem;
+        }
+
+        .diagnostic-panel {
+            padding: 20px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -117,65 +522,74 @@
     
     <!-- Agente e Narrativa -->
     <div class="agent-column">
-        <img src="{% static 'img/agente_secret.png' %}" class="agent-img" alt="Agente">
+        <div class="agent-status">STATUS: ONLINE</div>
+        
+        <div class="agent-image-container">
+            <img src="{% static 'img/agente_secret.png' %}" class="agent-img" alt="Agente">
+        </div>
         
         <div class="dialogue-box">
             <div class="speaker" id="speaker">AGENTE LÍDER</div>
             <div class="text" id="dialogue-text">...</div>
-            <button class="next-btn" onclick="nextStep()">></button>
+            <button class="next-btn" onclick="nextStep()">CONTINUAR ></button>
         </div>
     </div>
 
     <!-- Área de Interação -->
     <div class="puzzle-area">
         
-        <!-- Puzzle: Painel de Diagnóstico -->
+        <!-- Mensagem de Aguarde -->
+        <div id="waiting-message" class="waiting-message">
+            > AGUARDANDO INSTRUÇÕES...
+        </div>
+
+        <!-- Painel de Diagnóstico -->
         <div id="diagnostic-panel" class="diagnostic-panel">
             <div class="panel-header">
-                <h2 style="color: #fff; margin: 0;">SISTEMA CENTRAL v9.0</h2>
-                <span style="color: var(--error-red);">STATUS: CRÍTICO</span>
+                <h2>SISTEMA CENTRAL v9.0</h2>
+                <span class="status-badge">STATUS: CRÍTICO</span>
             </div>
             
-            <p style="color: #888; margin-bottom: 20px;">>> Clique no módulo defeituoso para iniciar protocolo de reparo.</p>
+            <p class="panel-instruction">>> Clique no módulo defeituoso para iniciar protocolo de reparo.</p>
 
             <div class="system-grid">
                 <!-- Módulos OK -->
                 <div class="sys-module" onclick="wrongChoice()">
-                    <div style="font-size: 2rem;">🔌</div>
-                    <div>
-                        <strong>FONTE DE ENERGIA</strong><br>
+                    <div class="sys-module-icon">🔌</div>
+                    <div class="sys-module-info">
+                        <strong>FONTE DE ENERGIA</strong>
                         <small class="status-ok">● OPERANTE (100%)</small>
                     </div>
                 </div>
 
                 <div class="sys-module" onclick="wrongChoice()">
-                    <div style="font-size: 2rem;">💾</div>
-                    <div>
-                        <strong>MEMÓRIA RAM</strong><br>
+                    <div class="sys-module-icon">💾</div>
+                    <div class="sys-module-info">
+                        <strong>MEMÓRIA RAM</strong>
                         <small class="status-ok">● OPERANTE (32GB)</small>
                     </div>
                 </div>
 
                 <div class="sys-module" onclick="wrongChoice()">
-                    <div style="font-size: 2rem;">💿</div>
-                    <div>
-                        <strong>ARMAZENAMENTO</strong><br>
+                    <div class="sys-module-icon">💿</div>
+                    <div class="sys-module-info">
+                        <strong>ARMAZENAMENTO</strong>
                         <small class="status-ok">● OPERANTE (4TB)</small>
                     </div>
                 </div>
 
                 <!-- Módulo com Erro (A Resposta) -->
-                <div class="sys-module" style="border-color: var(--error-red);" onclick="foundError()">
-                    <div style="font-size: 2rem;">🧠</div>
-                    <div>
-                        <strong>PROCESSADOR (CPU)</strong><br>
+                <div class="sys-module error-module" onclick="foundError()">
+                    <div class="sys-module-icon">🧠</div>
+                    <div class="sys-module-info">
+                        <strong>PROCESSADOR (CPU)</strong>
                         <small class="status-error">● FALHA CRÍTICA - AUSENTE</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Formulário Oculto para Enviar a Vitória -->
+        <!-- Formulário Oculto -->
         <form id="win-form" method="post" class="hidden">
             {% csrf_token %}
             <input type="hidden" name="action" value="diagnose_cpu">
@@ -190,13 +604,14 @@
         { s: "AGENTE LÍDER", t: "O sistema central caiu logo após o ataque. Nenhuma ordem pode ser processada." },
         { s: "SISTEMA", t: "⚠️ ALERTA: NÚCLEO DE PROCESSAMENTO NÃO RESPONDE." },
         { s: "AGENTE LÍDER", t: "Preciso que você acesse o painel manual agora e identifique a fonte exata da falha." },
-        { s: "TUTORIAL", t: "O painel de diagnóstico vai abrir. Clique no componente que está causando o erro." } // Índice 4 -> Abre Painel
+        { s: "TUTORIAL", t: "O painel de diagnóstico vai abrir. Clique no componente que está causando o erro." }
     ];
 
     let step = 0;
     const speakerEl = document.getElementById('speaker');
     const textEl = document.getElementById('dialogue-text');
     const panelEl = document.getElementById('diagnostic-panel');
+    const waitingEl = document.getElementById('waiting-message');
     const btnEl = document.querySelector('.next-btn');
 
     function render() {
@@ -209,9 +624,10 @@
         if (step < dialogues.length) {
             render();
             if (step === 4) {
-                // Abre o puzzle
-                btnEl.style.display = 'none'; // Esconde botão, força interação com puzzle
+                // Esconde botão e mostra painel
+                btnEl.style.display = 'none';
                 setTimeout(() => {
+                    waitingEl.style.display = 'none';
                     panelEl.style.display = 'block';
                 }, 500);
             }
@@ -219,22 +635,45 @@
     }
 
     function wrongChoice() {
-        alert("ERRO: Este módulo está funcionando corretamente. Procure o erro vermelho.");
+        // Feedback visual mais suave
+        const message = document.createElement('div');
+        message.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--warning-yellow);
+            padding: 20px 40px;
+            border-radius: 8px;
+            color: var(--warning-yellow);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        `;
+        message.textContent = "⚠️ ERRO: Este módulo está funcionando corretamente.";
+        document.body.appendChild(message);
+        
+        setTimeout(() => {
+            message.remove();
+        }, 2000);
     }
 
     function foundError() {
         panelEl.style.display = 'none';
         speakerEl.innerText = "SISTEMA";
-        textEl.innerHTML = "<span style='color:var(--text-highlight)'>DIAGNÓSTICO CONFIRMADO:</span><br>A CPU foi removida fisicamente. Sem ela, o computador não tem 'cérebro'.";
+        textEl.innerHTML = "<span style='color:var(--neon-green); font-weight: bold;'>✓ DIAGNÓSTICO CONFIRMADO:</span><br><br>A CPU foi removida fisicamente. Sem ela, o computador não tem 'cérebro' para processar as operações.";
         btnEl.style.display = 'block';
+        btnEl.textContent = 'PROSSEGUIR >';
         
-        // Altera o comportamento do botão para enviar o form na próxima
+        // Altera comportamento do botão
         btnEl.onclick = function() {
             document.getElementById('win-form').submit();
         };
     }
 
-    // Inicia
+    // Inicialização
     render();
 </script>
 {% endblock %}

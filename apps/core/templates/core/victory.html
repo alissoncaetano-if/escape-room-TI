@@ -1,0 +1,432 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Missão Completa{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variáveis */
+    :root {
+        --neon-green: #00ff41;
+        --gold: #ffd700;
+        --dark-bg: #0a0e12;
+        --panel-bg: #0d1117;
+        --border-color: #1a2332;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+    }
+
+    /* Story Mode - Tela de Vitória */
+    .victory-overlay {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(10, 14, 18, 0.95) 100%);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow: hidden;
+    }
+
+    /* Efeito de Partículas de Celebração */
+    .victory-overlay::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20% 30%, white, transparent),
+            radial-gradient(2px 2px at 60% 70%, var(--neon-green), transparent),
+            radial-gradient(1px 1px at 50% 50%, var(--gold), transparent),
+            radial-gradient(1px 1px at 80% 10%, white, transparent),
+            radial-gradient(2px 2px at 90% 60%, var(--neon-green), transparent),
+            radial-gradient(1px 1px at 33% 80%, var(--gold), transparent);
+        background-size: 200% 200%;
+        animation: particles 20s linear infinite;
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    @keyframes particles {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 100% 100%; }
+    }
+
+    .victory-content {
+        display: flex;
+        max-width: 1100px;
+        width: 95%;
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 2px solid var(--neon-green);
+        box-shadow: 
+            0 0 80px rgba(0, 255, 65, 0.4),
+            inset 0 0 30px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        animation: victoryAppear 0.8s ease-out;
+        position: relative;
+    }
+
+    @keyframes victoryAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Brilho nos Cantos */
+    .victory-content::before,
+    .victory-content::after {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(0, 255, 65, 0.3), transparent);
+        animation: cornerGlow 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .victory-content::before {
+        top: -50px;
+        left: -50px;
+    }
+
+    .victory-content::after {
+        bottom: -50px;
+        right: -50px;
+        animation-delay: 1.5s;
+    }
+
+    @keyframes cornerGlow {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    /* Área da Imagem */
+    .victory-img {
+        flex: 1;
+        min-height: 500px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .victory-img::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+        z-index: 1;
+    }
+
+    .victory-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.9;
+        animation: imageReveal 1s ease-out;
+    }
+
+    @keyframes imageReveal {
+        from {
+            opacity: 0;
+            transform: scale(1.1);
+        }
+        to {
+            opacity: 0.9;
+            transform: scale(1);
+        }
+    }
+
+    /* Badge de Vitória */
+    .victory-badge {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        background: linear-gradient(135deg, var(--gold) 0%, #ffed4e 100%);
+        color: #000;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        z-index: 2;
+        animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Área do Texto */
+    .victory-text-area {
+        flex: 1;
+        padding: 60px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(90deg, rgba(13, 17, 23, 0.95) 0%, rgba(22, 27, 34, 0.98) 100%);
+        position: relative;
+    }
+
+    .victory-title {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 15px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        animation: titleGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+        0%, 100% { text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+        50% { text-shadow: 0 0 20px rgba(0, 255, 65, 0.8); }
+    }
+
+    .victory-title::before {
+        content: '✓';
+        margin-right: 12px;
+        font-size: 1.3rem;
+        color: var(--gold);
+    }
+
+    .agent-name {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--gold);
+        margin-bottom: 25px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        animation: nameShine 3s ease-in-out infinite;
+    }
+
+    @keyframes nameShine {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    .victory-message {
+        font-size: 1.15rem;
+        line-height: 2;
+        color: var(--text-primary);
+        margin-bottom: 35px;
+        padding-left: 20px;
+        border-left: 3px solid var(--neon-green);
+    }
+
+    .victory-message strong {
+        color: var(--neon-green);
+        font-weight: 600;
+    }
+
+    /* Stats de Missão */
+    .mission-stats {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 35px;
+    }
+
+    .mission-stats h3 {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        letter-spacing: 2px;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .stat-item span:last-child {
+        color: var(--neon-green);
+        font-weight: bold;
+    }
+
+    /* Botão de Retorno */
+    .return-btn {
+        background: linear-gradient(135deg, var(--neon-green) 0%, #00cc35 100%);
+        color: #000;
+        border: none;
+        padding: 15px 40px;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+        cursor: pointer;
+        font-size: 0.95rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 255, 65, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .return-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .return-btn:hover::before {
+        left: 100%;
+    }
+
+    .return-btn:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 6px 30px rgba(0, 255, 65, 0.5);
+    }
+
+    .return-btn:active {
+        transform: translateX(-3px);
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+        .victory-content {
+            flex-direction: column;
+        }
+
+        .victory-img {
+            min-height: 350px;
+        }
+
+        .victory-text-area {
+            padding: 40px 35px;
+        }
+
+        .agent-name {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .victory-text-area {
+            padding: 30px 25px;
+        }
+
+        .victory-title {
+            font-size: 0.85rem;
+        }
+
+        .agent-name {
+            font-size: 1.6rem;
+        }
+
+        .victory-message {
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .victory-badge {
+            font-size: 0.75rem;
+            padding: 8px 15px;
+            top: 20px;
+            left: 20px;
+        }
+
+        .mission-stats {
+            padding: 15px;
+        }
+
+        .stat-item {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- TELA DE VITÓRIA -->
+<div class="victory-overlay">
+    <div class="victory-content">
+        <div class="victory-img">
+            <!-- IMAGEM DE CELEBRAÇÃO / AGENTE VITORIOSO -->
+            <img src="{% static 'img/Victory.jpeg' %}" alt="Missão Concluída">
+        </div>
+        
+        <div class="victory-text-area">
+            <div class="victory-title">MISSÃO TECH_ CONCLUÍDA</div>
+            
+            <h1 class="agent-name">AGENTE {{ user.username|upper }}</h1>
+            
+            <p class="victory-message">
+                Parabéns, Agente! Você restaurou o sistema central com <strong>maestria</strong>.<br><br>
+                Cada desafio foi superado com precisão cirúrgica. O processador está online, os dados foram corrigidos, e o protocolo final foi desbloqueado.<br><br>
+                A base está operacional novamente graças às suas habilidades em <strong>Tecnologia da Informação</strong>.
+            </p>
+
+            <div class="mission-stats">
+                <h3>▸ RELATÓRIO DA MISSÃO</h3>
+                <div class="stat-item">
+                    <span>Status da Operação:</span>
+                    <span>SUCESSO TOTAL ✓</span>
+                </div>
+                <div class="stat-item">
+                    <span>Componentes Instalados:</span>
+                    <span>CPU OPERACIONAL</span>
+                </div>
+                <div class="stat-item">
+                    <span>Dados Corrigidos:</span>
+                    <span>100% INTEGRIDADE</span>
+                </div>
+                <div class="stat-item">
+                    <span>Protocolos Desbloqueados:</span>
+                    <span>ACESSO LIBERADO</span>
+                </div>
+                <div class="stat-item">
+                    <span>Classificação:</span>
+                    <span>★★★★★ ELITE</span>
+                </div>
+            </div>
+
+            <a href="{% url 'core:dashboard' %}" class="btn">
+                ← RETORNAR À BASE
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

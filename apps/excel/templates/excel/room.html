@@ -5,23 +5,310 @@
 
 {% block extra_css %}
 <style>
-    /* Overlay Padrão */
+    /* Variáveis */
+    :root {
+        --neon-green: #00ff41;
+        --dark-bg: #0a0e12;
+        --panel-bg: #0d1117;
+        --border-color: #1a2332;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --error-red: #ff3333;
+    }
+
+    /* Story Mode Melhorado */
     .story-overlay {
-        position: fixed; top: 70px; left: 0; width: 100%; height: calc(100vh - 70px);
-        background: rgba(0,0,0,0.95); z-index: 2000;
-        display: flex; align-items: center; justify-content: center;
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(10, 14, 18, 0.95) 100%);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
     }
+
     .story-content {
-        display: flex; max-width: 1000px; width: 90%; 
-        background: #161b22; border: 1px solid var(--text-highlight);
+        display: flex;
+        max-width: 1100px;
+        width: 95%;
+        background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+        border: 2px solid var(--neon-green);
+        box-shadow: 
+            0 0 50px rgba(0, 255, 65, 0.2),
+            inset 0 0 30px rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        overflow: hidden;
+        animation: storyAppear 0.6s ease-out;
     }
-    .story-img { flex: 1; min-height: 400px; background: #000; }
-    .story-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
-    .story-text-area { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-    .story-speaker { color: var(--text-highlight); font-family: monospace; font-weight: bold; margin-bottom: 15px; }
-    .story-p { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; border-left: 2px solid #333; padding-left: 15px; }
-    
-    .puzzle-container { display: none; }
+
+    @keyframes storyAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Área da Imagem */
+    .story-img {
+        flex: 1;
+        min-height: 450px;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .story-img::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+        z-index: 1;
+    }
+
+    .story-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.85;
+        transition: transform 0.3s ease;
+    }
+
+    .story-img:hover img {
+        transform: scale(1.05);
+    }
+
+    /* Área do Texto */
+    .story-text-area {
+        flex: 1;
+        padding: 50px 45px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(90deg, rgba(13, 17, 23, 0.95) 0%, rgba(22, 27, 34, 0.98) 100%);
+    }
+
+    .story-speaker {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+    }
+
+    .story-speaker::before {
+        content: '▶';
+        margin-right: 10px;
+        font-size: 1rem;
+        animation: blink-speaker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink-speaker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .story-p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-primary);
+        margin-bottom: 35px;
+        padding-left: 20px;
+        border-left: 3px solid var(--neon-green);
+        position: relative;
+    }
+
+    .story-p strong {
+        color: var(--neon-green);
+        font-weight: 600;
+    }
+
+    /* Container do Puzzle */
+    .puzzle-container {
+        display: none;
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(180deg, var(--dark-bg) 0%, #000 100%);
+        padding: 60px 20px;
+    }
+
+    .puzzle-container h1 {
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-size: 2rem;
+        margin-bottom: 40px;
+        text-align: center;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    /* Container do Desafio */
+    .challenge-container {
+        display: flex;
+        gap: 30px;
+        margin-top: 30px;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Área da Preview */
+    .preview-area {
+        flex: 1.5;
+    }
+
+    .preview-area img {
+        width: 100%;
+        border: 2px solid #444;
+        border-radius: 6px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s ease;
+    }
+
+    .preview-area img:hover {
+        transform: scale(1.02);
+    }
+
+    .preview-placeholder {
+        height: 350px;
+        background: linear-gradient(135deg, #222 0%, #111 100%);
+        border: 2px dashed #555;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #777;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+    }
+
+    /* Área do Formulário */
+    .form-area {
+        flex: 1;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+        padding: 30px;
+        border-radius: 8px;
+        border: 2px solid #333;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-area h3 {
+        color: #fff;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+        font-size: 1.1rem;
+    }
+
+    .form-area p {
+        color: #ccc;
+        font-style: italic;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 3px solid var(--neon-green);
+        border-radius: 4px;
+        line-height: 1.6;
+    }
+
+    .form-area form label {
+        display: block;
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .form-area form input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #444;
+        border-radius: 4px;
+        color: #fff;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .form-area form input[type="text"]:focus {
+        outline: none;
+        border-color: var(--neon-green);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
+
+    /* Mensagem de Erro */
+    .error {
+        margin-top: 15px;
+        padding: 12px 18px;
+        background: rgba(255, 59, 59, 0.1);
+        border: 2px solid var(--error-red);
+        border-radius: 4px;
+        color: var(--error-red);
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+        .story-content {
+            flex-direction: column;
+        }
+
+        .story-img {
+            min-height: 300px;
+        }
+
+        .story-text-area {
+            padding: 35px 30px;
+        }
+
+        .challenge-container {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .story-text-area {
+            padding: 25px 20px;
+        }
+
+        .story-p {
+            font-size: 1rem;
+        }
+
+        .form-area {
+            padding: 20px;
+        }
+
+        .puzzle-container h1 {
+            font-size: 1.4rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -31,14 +318,13 @@
 <div class="story-overlay" id="story-layer">
     <div class="story-content">
         <div class="story-img">
-            <!-- IMAGEM DE MONITORES COM DADOS ERRADOS/VERMELHOS -->
             <img src="{% static 'img/DesafioExcel.png' %}" alt="Monitores com Erro">
         </div>
         <div class="story-text-area">
-            <div class="story-speaker">>> ALERTA DE INTEGRIDADE</div>
+            <div class="story-speaker">ALERTA DE INTEGRIDADE</div>
             <p class="story-p">
                 "Hardware online. Inicializando sistema operacional...<br>
-                <span style="color: #ff3333;">[ERRO] Inconsistência na base de dados financeira.</span><br><br>
+                <span style="color: #ff3333; font-weight: bold;">[ERRO] Inconsistência na base de dados financeira.</span><br><br>
                 Agente, o processador funciona, mas os dados estão corrompidos. O sistema está calculando prejuízos milionários incorretamente. Use suas habilidades em Planilhas para corrigir as fórmulas e estabilizar o núcleo."
             </p>
             <button class="btn" onclick="startPuzzle()">ANALISAR DADOS</button>
@@ -47,24 +333,23 @@
 </div>
 
 <!-- PUZZLE (Pergunta) -->
-<div class="container puzzle-container" id="puzzle-layer" style="max-width: 900px; margin-top: 40px;">
-    <h1 style="color: var(--text-highlight);">📊 DEPARTAMENTO FINANCEIRO - CORREÇÃO</h1>
+<div class="container puzzle-container" id="puzzle-layer">
+    <h1>📊 DEPARTAMENTO FINANCEIRO - CORREÇÃO</h1>
     
-    <div style="display: flex; gap: 30px; margin-top: 30px;">
-        <div style="flex: 1.5;">
-            <!-- Imagem do desafio do banco de dados -->
+    <div class="challenge-container">
+        <div class="preview-area">
             {% if challenge.data_preview %}
-                <img src="{{ challenge.data_preview.url }}" style="width: 100%; border: 2px solid #444; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+                <img src="{% static 'img/planilhaExcel.png' %}" alt="Tabela Excel"> 
             {% else %}
-                <div style="height: 250px; background: #222; border: 2px dashed #555; display: flex; align-items: center; justify-content: center; color: #777;">
+                <div class="preview-placeholder">
                     [IMAGEM DA TABELA EXCEL AQUI]
                 </div>
             {% endif %}
         </div>
         
-        <div style="flex: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
-            <h3 style="color: #fff; margin-top: 0;">SITUAÇÃO ENCONTRADA:</h3>
-            <p style="color: #ccc; font-style: italic; margin-bottom: 20px;">"{{ challenge.scenario }}"</p>
+        <div class="form-area">
+            <h3>SITUAÇÃO ENCONTRADA:</h3>
+            <p>"{{ challenge.scenario }}"</p>
             
             <form method="post">
                 {% csrf_token %}
@@ -74,7 +359,7 @@
             </form>
             
             {% if error %}
-                <p class="error" style="margin-top: 15px;">❌ {{ error }}</p>
+                <p class="error">❌ {{ error }}</p>
             {% endif %}
         </div>
     </div>
